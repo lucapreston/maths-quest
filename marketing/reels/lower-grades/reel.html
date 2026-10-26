@@ -15,7 +15,7 @@ const INK = "#2747a8", RED = "#e0284f", GREEN = "#12a35c";
 const HAND = 'italic 600 64px Caladea';
 
 const S = K.stage({
-  duration: 28,
+  duration: 29,
   captionBox: true,
   captions: [
     [0.0, 1.5, `Why are your maths grades`],
@@ -31,9 +31,10 @@ const S = K.stage({
     [16.8, 18.6, `Reason 3: you make the <span class="neg">same mistake</span> twice.`],
     [18.6, 20.0, `Every wrong answer has a <span class="gold">reason.</span>`],
     [20.0, 21.4, `Know it, and you <span class="pos">won't repeat it.</span>`],
-    [21.6, 23.3, `8,000+ real <span class="gold">GCSE &amp; A-level</span> exam questions.`, 1500],
-    [23.3, 25.4, `Every wrong answer tells you <span class="gold">why.</span>`, 1500],
-    [25.4, 28.01, `Maths <span class="gold">Quest</span>`, 1440],
+    [21.6, 23.0, `Do your <span class="gold">5 a day.</span>`, 1500],
+    [23.0, 24.6, `8,000+ real <span class="gold">GCSE &amp; A-level</span> exam questions.`, 1500],
+    [24.6, 26.1, `Every wrong answer tells you <span class="gold">why.</span>`, 1500],
+    [26.1, 29.01, `Maths <span class="gold">Quest</span>`, 1440],
   ],
 });
 const { scene } = S;
@@ -162,16 +163,18 @@ const CARD_Y = [1.35, 0, -1.35], CARD_AT = [17.1, 17.6, 18.1];
 S.ring(18.7, 19.9, () => planePoint(cards[0].face, 770, 145, 930, 285, 3.1, 0.95), 110);
 
 // ---------- shot 5: the app ----------
-const quiz = K.quiz({
-  pills: ["A-level", "Edexcel", "3 marks"],
-  question: ["f(x) = (3x − 5)/(x + 1).", "Find f⁻¹(x)."],
-  optionsTop: 560,
-  options: [{ frac: ["x+5", "x−3"] }, { frac: ["x+5", "3−x"] }, { frac: ["x+1", "3x−5"] }],
-  why: ["Sign error:", "−(x+5)/(x−3) = (x+5)/(3−x)"],
+const APP = { start: 22.9, push: 23.0, wrong: 24.0, right: 25.4 };
+const quiz = K.mqQuestion({
+  question: [[["Given ", "sans"], ["f(x) = (3x − 5)/(x + 1),", "serif"]], [["find ", "sans"], ["f⁻¹(x).", "serif"]]],
+  options: [{ frac: ["x + 5", "x − 3"] }, { frac: ["x + 5", "3 − x"] }, { frac: ["2x + 5", "3 − x"] }, { frac: ["x + 1", "3x − 5"] }],
+  why: ["Not quite: sign error", "−(x + 5)/(x − 3) = (x + 5)/(3 − x)"],
+  good: ["Nice one!", "Full marks: M1, M1, A1."],
 });
-const ph = K.phone(quiz.draw); ph.scale.setScalar(0.78); scene.add(ph);
-S.ring(23.0, 23.8, () => K.screenPoint(ph, ...quiz.markPoint(0)), 75);
-S.ring(24.8, 25.6, () => K.screenPoint(ph, ...quiz.markPoint(1)), 75);
+const ph = K.phone(() => {}); ph.scale.setScalar(0.92); scene.add(ph);
+let screen = () => {}, brand;
+S.ring(22.4, 23.1, () => K.screenPoint(ph, ...brand.startPoint), 115);
+S.ring(APP.wrong, APP.wrong + 0.8, () => K.screenPoint(ph, ...quiz.markPoint(0)), 60);
+S.ring(APP.right, APP.right + 0.9, () => K.screenPoint(ph, ...quiz.markPoint(1)), 60);
 const btn = K.el("div", "btn", S.ov, "Get Maths Quest free"); btn.style.top = "1620px";
 const bio = K.el("div", "cap dim", S.ov, "link in bio"); bio.style.cssText += "top:1790px;font-size:36px;font-weight:600";
 
@@ -190,7 +193,7 @@ const CAM = [
   { t: 17.3, pos: [0.6, Y4 + 0.4, 11], look: [0, Y4, 0], dur: 0.5 },
   { t: 21.4, pos: [-0.4, Y4 + 0.2, 9.2], look: [0, Y4, 0] },
   { t: 22.1, pos: [0, Y5 + 0.6, 16], look: [0, Y5 + 0.9, 0], dur: 0.6 },
-  { t: 28, pos: [0, Y5 + 0.6, 14.5], look: [0, Y5 + 0.9, 0] },
+  { t: 29, pos: [0, Y5 + 0.6, 15.4], look: [0, Y5 + 0.9, 0] },
 ];
 
 S.onFrame(t => {
@@ -232,14 +235,13 @@ S.onFrame(t => {
   // phone
   const fly = outCubic(prog(t, 21.5, 22.4));
   ph.position.set(0, Y5 - (1 - fly) * 7 + Math.sin(t * 1.4) * 0.08, (1 - fly) * -3);
-  ph.rotation.set((1 - fly) * 0.6, lerp(1.4, -0.22, fly) + prog(t, 22.4, 28) * 0.34, (1 - fly) * 0.25);
-  ph.screen.tex.redraw((c, w, h) => quiz.draw(c, w, h, { wrong: t >= 23.0 ? 0 : -1, why: t >= 23.3, right: t >= 24.8 ? 1 : -1, xp: t >= 24.9 }),
-    `${t >= 23.0}${t >= 23.3}${t >= 24.8}${t >= 24.9}`);
-  const b = prog(t, 25.6, 26.0);
+  ph.rotation.set((1 - fly) * 0.6, lerp(1.4, -0.22, fly) + prog(t, 22.4, 29) * 0.3, (1 - fly) * 0.25);
+  screen(t);
+  const b = prog(t, 26.2, 26.6);
   btn.style.opacity = b; bio.style.opacity = b;
-  btn.style.transform = `scale(${0.8 + 0.2 * outBack(b) + (t > 26 ? Math.sin((t - 26) * 4) * 0.025 : 0)})`;
+  btn.style.transform = `scale(${0.8 + 0.2 * outBack(b) + (t > 26.6 ? Math.sin((t - 26.6) * 4) * 0.025 : 0)})`;
 });
-document.fonts.ready.then(() => S.start());
+K.loadBrand("../lib/").then(b => { brand = b; screen = K.mqScript(ph, quiz, b.fiveADay, APP); S.start(); });
 </script>
 </body>
 </html>

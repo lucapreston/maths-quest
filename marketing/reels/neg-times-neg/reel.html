@@ -14,7 +14,7 @@ const K = Kit, { prog, smooth, outBack, outCubic, lerp, C } = K;
 const Y2 = -14, Y3 = -28, Y4 = -42;
 
 const S = K.stage({
-  duration: 24,
+  duration: 25.5,
   captions: [
     [0.0, 1.5, `Why does a <span class="neg">negative</span> × <span class="neg">negative</span>`],
     [1.5, 3.0, `make a <span class="pos">positive?</span>`],
@@ -32,9 +32,10 @@ const S = K.stage({
     [14.1, 15.7, `× −1 → facing <span class="neg">backwards.</span>`],
     [15.7, 17.2, `× −1 again → <span class="pos">forwards.</span>`],
     [17.2, 18.4, `Two negatives make a <span class="pos">positive.</span>`],
-    [18.6, 20.3, `8,000+ real <span class="gold">GCSE &amp; A-level</span> exam questions.`, 1500],
-    [20.3, 22.0, `Every answer <span class="gold">explained.</span>`, 1500],
-    [22.0, 24.01, `Maths <span class="gold">Quest</span>`, 1440],
+    [18.6, 20.0, `Do your <span class="gold">5 a day.</span>`, 1500],
+    [20.0, 21.9, `8,000+ real <span class="gold">GCSE &amp; A-level</span> exam questions.`, 1500],
+    [21.9, 23.0, `Every answer <span class="gold">explained.</span>`, 1500],
+    [23.0, 25.51, `Maths <span class="gold">Quest</span>`, 1440],
   ],
 });
 const { scene } = S;
@@ -118,14 +119,18 @@ arc.rotation.x = Math.PI / 2; arc.position.set(0, Y3 + 0.95, 0.15); scene.add(ar
 const goldCol = new THREE.Color(C.gold);
 
 // ---------- shot 4: the app ----------
-const quiz = K.quiz({
-  pills: ["GCSE", "Edexcel", "2 marks"],
-  question: ["Work out (−3) × (−4) − 5"],
+const APP = { start: 19.9, push: 20.0, wrong: 20.9, right: 22.0 };
+const quiz = K.mqQuestion({
+  question: [[["Work out ", "sans"], ["(−3) × (−4) − 5", "serif"]]],
   options: [{ text: "−17" }, { text: "7" }, { text: "17" }, { text: "−7" }],
+  why: ["Not quite", "(−3) × (−4) = +12, so 12 − 5 = 7"],
+  good: ["Nice one!", "Two negatives make a positive."],
 });
-const ph = K.phone(quiz.draw); ph.scale.setScalar(0.78); scene.add(ph);
-S.ring(20.3, 21.0, () => K.screenPoint(ph, ...quiz.markPoint(0)), 75);
-S.ring(21.0, 21.9, () => K.screenPoint(ph, ...quiz.markPoint(1)), 75);
+const ph = K.phone(() => {}); ph.scale.setScalar(0.92); scene.add(ph);
+let screen = () => {}, brand;
+S.ring(19.4, 20.1, () => K.screenPoint(ph, ...brand.startPoint), 115);
+S.ring(APP.wrong, APP.wrong + 0.8, () => K.screenPoint(ph, ...quiz.markPoint(0)), 60);
+S.ring(APP.right, APP.right + 0.9, () => K.screenPoint(ph, ...quiz.markPoint(1)), 60);
 const btn = K.el("div", "btn", S.ov, "Get Maths Quest free"); btn.style.top = "1620px";
 const bio = K.el("div", "cap dim", S.ov, "link in bio"); bio.style.cssText += "top:1790px;font-size:36px;font-weight:600";
 
@@ -140,7 +145,7 @@ const CAM = [
   { t: 13.1, pos: [5, Y3 + 3, 14], look: [0.6, Y3 + 0.7, 0], dur: 0.5 },
   { t: 18.4, pos: [-4.5, Y3 + 2.6, 14], look: [0.4, Y3 + 0.7, 0] },
   { t: 19.1, pos: [0, Y4 + 0.6, 16], look: [0, Y4 + 0.9, 0], dur: 0.6 },
-  { t: 24, pos: [0, Y4 + 0.6, 14.5], look: [0, Y4 + 0.9, 0] },
+  { t: 25.5, pos: [0, Y4 + 0.6, 15.4], look: [0, Y4 + 0.9, 0] },
 ];
 
 S.onFrame(t => {
@@ -182,14 +187,13 @@ S.onFrame(t => {
   // shot 4
   const fly = outCubic(prog(t, 18.5, 19.4));
   ph.position.set(0, Y4 - (1 - fly) * 7 + Math.sin(t * 1.4) * 0.08, (1 - fly) * -3);
-  ph.rotation.set((1 - fly) * 0.6, lerp(1.4, -0.22, fly) + prog(t, 19.4, 24) * 0.34, (1 - fly) * 0.25);
-  ph.screen.tex.redraw((c, w, h) => quiz.draw(c, w, h, { wrong: t >= 20.4 ? 0 : -1, right: t >= 21.1 ? 1 : -1, xp: t >= 21.2 }),
-    `${t >= 20.4}${t >= 21.1}${t >= 21.2}`);
-  const b = prog(t, 22.0, 22.4);
+  ph.rotation.set((1 - fly) * 0.6, lerp(1.4, -0.22, fly) + prog(t, 19.4, 25.5) * 0.3, (1 - fly) * 0.25);
+  screen(t);
+  const b = prog(t, 23.1, 23.5);
   btn.style.opacity = b; bio.style.opacity = b;
-  btn.style.transform = `scale(${0.8 + 0.2 * outBack(b) + (t > 22.4 ? Math.sin((t - 22.4) * 4) * 0.025 : 0)})`;
+  btn.style.transform = `scale(${0.8 + 0.2 * outBack(b) + (t > 23.5 ? Math.sin((t - 23.5) * 4) * 0.025 : 0)})`;
 });
-document.fonts.ready.then(() => S.start());
+K.loadBrand("../lib/").then(b => { brand = b; screen = K.mqScript(ph, quiz, b.fiveADay, APP); S.start(); });
 </script>
 </body>
 </html>

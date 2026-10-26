@@ -212,59 +212,134 @@
     }
     window.DURATION = duration;
     window.seek = t => render(t);
+    window.READY = false;
     const api = { scene, camera, renderer, ov, ring, camPath, project, glow, onFrame: fn => { update = fn; } };
     api.start = () => {
       if (!navigator.webdriver) { const t0 = performance.now(); (function loop() { render(((performance.now() - t0) / 1000) % duration); requestAnimationFrame(loop); })(); }
       else render(0);
+      window.READY = true;
     };
     return api;
   }
 
-  // phone quiz screen. q = {pills, question: [lines], options: [{text} | {frac:[num,den]}], why: [lines]}
-  // state = {wrong, right, xp, why}
-  function quiz(q) {
-    const X = 60, OY = q.optionsTop ?? 600, OH = 200, GAP = 30;
-    const optY = i => OY + i * (OH + GAP);
-    function draw(c, w, h, s = {}) {
-      c.fillStyle = "#121624"; roundRect(c, 0, 0, w, h, 96); c.fill();
-      c.fillStyle = "#8a90a6"; c.font = "600 34px Inter"; c.fillText("9:41", 90, 84);
-      c.font = '900 56px "Inter Display"'; c.fillStyle = "#f5f6fa"; c.fillText("Maths", X, 210);
-      c.fillStyle = "#ffd23f"; c.fillText("Quest", X + c.measureText("Maths ").width, 210);
-      if (s.xp) { c.textAlign = "right"; c.font = "800 44px Inter"; c.fillText("+20 XP", w - X, 206); c.textAlign = "left"; }
-      let px = X; c.font = "600 30px Inter";
-      q.pills.forEach(p => { const pw = c.measureText(p).width + 44; c.fillStyle = "#22283a"; roundRect(c, px, 260, pw, 58, 29); c.fill(); c.fillStyle = "#9aa0b6"; c.fillText(p, px + 22, 300); px += pw + 14; });
-      c.fillStyle = "#f5f6fa"; c.font = "700 50px Inter";
-      q.question.forEach((l, i) => c.fillText(l, X, 410 + i * 66));
-      q.options.forEach((o, i) => {
-        const y = optY(i), wrong = s.wrong === i, right = s.right === i;
-        c.fillStyle = wrong ? "rgba(255,92,122,.14)" : right ? "rgba(62,224,143,.14)" : "#171c2b";
-        roundRect(c, X, y, w - 2 * X, OH, 40); c.fill();
-        c.lineWidth = 6; c.strokeStyle = wrong ? "#ff5c7a" : right ? "#3ee08f" : "#2a3043"; c.stroke();
-        c.fillStyle = "#f5f6fa"; c.font = '700 66px "JetBrains Mono"';
-        if (o.frac) frac(c, o.frac[0], o.frac[1], X + 50, y + OH / 2 + 10, 72);
-        else c.fillText(o.text, X + 50, y + OH / 2 + 24);
-        if (wrong || right) { c.font = "900 64px Inter"; c.fillStyle = wrong ? "#ff5c7a" : "#3ee08f"; c.textAlign = "right"; c.fillText(wrong ? "✗" : "✓", w - X - 50, y + OH / 2 + 22); c.textAlign = "left"; }
-      });
-      if (s.why && q.why) {
-        const y = optY(q.options.length) + 20;
-        c.fillStyle = "rgba(255,92,122,.14)"; roundRect(c, X, y, w - 2 * X, 70 + q.why.length * 54, 36); c.fill();
-        c.strokeStyle = "#ff5c7a"; c.lineWidth = 4; c.stroke();
-        c.font = "600 40px Inter";
-        q.why.forEach((l, i) => { c.fillStyle = i ? "#f5f6fa" : "#ff6b86"; c.fillText(l, X + 40, y + 76 + i * 54); });
-      }
-      const done = s.right >= 0;
-      c.fillStyle = done ? "#ffd23f" : "#22283a"; roundRect(c, X, h - 250, w - 2 * X, 150, 75); c.fill();
-      c.fillStyle = done ? "#11131a" : "#6b7189"; c.font = '900 52px "Inter Display"'; c.textAlign = "center";
-      c.fillText(done ? "Next question →" : "Check answer", w / 2, h - 158); c.textAlign = "left";
-    }
-    // centre of option i in canvas pixels
-    return { draw, optionCenter: i => [459, optY(i) + OH / 2], markPoint: i => [918 - X - 80, optY(i) + OH / 2] };
+  // ---------- Maths Quest app screens ----------
+  // Recreates the real app's question screen (mustard background, cream cards with thick ink outlines
+  // and offset shadows). Layout is in the app screenshot's 919×1999 space, scaled onto the phone canvas.
+  const MQ = { bg: "#ecba4f", cream: "#f1f0ea", white: "#ffffff", ink: "#141414", navy: "#172775", red: "#d2392b",
+    redFill: "#f8d9d3", green: "#2e8b3d", greenFill: "#dcefd8", grey: "#5e5a50" };
+  const SX = 918 / 919 * 0.985, SY = 1968 / 1999, OX = (918 - 919 * SX) / 2;
+  const toCanvas = (x, y) => [OX + x * SX, y * SY];
+  const SANS = 'Bricolage', SERIF = 'Caladea';
+  function font(c, weight, size, family = SANS, stretch = "normal") { c.font = `${weight} ${size}px ${family}`; c.fontStretch = stretch; }
+  function card(c, x, y, w, h, r, fill, opts = {}) {
+    const lw = opts.lw ?? 5, sh = opts.shadow ?? 9;
+    if (sh) { c.fillStyle = MQ.ink; roundRect(c, x, y + sh, w, h, r); c.fill(); }
+    c.fillStyle = fill; roundRect(c, x, y, w, h, r); c.fill();
+    c.lineWidth = lw; c.strokeStyle = opts.stroke ?? MQ.ink; c.stroke();
   }
+  function statusBar(c, island) {
+    font(c, 700, 36, "Inter"); c.fillStyle = MQ.ink; c.fillText("9:41", 108, 88);
+    if (island) { c.fillStyle = "#000"; roundRect(c, 318, 32, 284, 82, 41); c.fill(); }
+    c.fillStyle = MQ.ink; [0, 1, 2, 3].forEach(k => { roundRect(c, 658 + k * 13, 80 - (k + 1) * 7, 9, (k + 1) * 7, 2); c.fill(); });
+    roundRect(c, 775, 60, 54, 28, 9); c.fill(); c.fillStyle = MQ.bg; font(c, 800, 20, "Inter"); c.fillText("80", 787, 81);
+  }
+  // inline run of [text, "sans"|"serif"] parts
+  function runs(c, parts, x, y, size) {
+    parts.forEach(([t, f]) => { if (f === "serif") font(c, 400, size * 1.08, SERIF); else font(c, 700, size); c.fillStyle = MQ.ink; c.fillText(t, x, y); x += c.measureText(t).width; });
+  }
+  // q = {title, step, question: [lines of [text, "sans"|"serif"] runs], options: [{text}|{frac:[n,d]}], why: [heading, line], good: [heading, line]}
+  // s = {wrong, right, why, good, tap: {i, p}}
+  function mqQuestion(q) {
+    const OY = 734, OH = 118, OG = 140, n = q.options.length;
+    function draw(c, w, h, s = {}) {
+      c.save(); c.fillStyle = MQ.bg; c.fillRect(0, 0, w, h);
+      c.translate(OX, 0); c.scale(SX, SY);
+      statusBar(c, true);
+      card(c, 37, 162, 104, 104, 52, MQ.cream, { shadow: 7 });
+      c.strokeStyle = MQ.ink; c.lineWidth = 9; c.lineCap = "round"; c.beginPath(); c.moveTo(74, 199); c.lineTo(104, 229); c.moveTo(104, 199); c.lineTo(74, 229); c.stroke();
+      font(c, 700, 46); c.fillStyle = MQ.ink; c.textAlign = "center"; c.fillText(q.title ?? "5 a day", 459, 232);
+      card(c, 752, 184, 130, 64, 32, MQ.cream, { shadow: 5, lw: 4 }); font(c, 700, 30); c.fillStyle = MQ.ink; c.fillText(q.step ?? "1 of 5", 817, 227); c.textAlign = "left";
+      for (let k = 0; k < 5; k++) card(c, 36 + k * 171.5, 308, 159, 40, 20, k === 0 ? MQ.navy : MQ.cream, { shadow: 6, lw: 4 });
+      const cardH = OY + n * OG + 44 - 398;
+      card(c, 36, 398, 846, cardH, 50, MQ.cream, { shadow: 10 });
+      q.question.forEach((line, k) => runs(c, line, 76, 478 + k * 58, 42));
+      font(c, 500, 28); c.fillStyle = MQ.grey; c.fillText("Report", 765, 554);
+      c.strokeStyle = MQ.grey; c.lineWidth = 3; c.beginPath(); c.moveTo(724, 556); c.lineTo(724, 530); c.lineTo(744, 533); c.lineTo(740, 543); c.lineTo(744, 550); c.lineTo(724, 548); c.stroke();
+      card(c, 72, 588, 774, 124, 40, MQ.cream, { shadow: 9 });
+      c.strokeStyle = MQ.navy; c.lineWidth = 4; c.beginPath(); c.moveTo(114, 646); c.quadraticCurveTo(128, 632, 128, 645); c.quadraticCurveTo(116, 664, 132, 660); c.moveTo(140, 664); c.lineTo(158, 638); c.stroke();
+      font(c, 700, 34); c.fillStyle = MQ.ink; c.fillText("Workings", 182, 664);
+      c.strokeStyle = MQ.ink; c.lineWidth = 4; c.beginPath(); c.moveTo(672, 645); c.lineTo(685, 658); c.lineTo(698, 645); c.stroke();
+      c.lineWidth = 4; c.beginPath(); c.arc(765, 652, 44, 0, 7); c.stroke();
+      c.beginPath(); c.moveTo(750, 637); c.lineTo(780, 667); c.moveTo(750, 637); c.lineTo(750, 650); c.moveTo(750, 637); c.lineTo(763, 637); c.moveTo(780, 667); c.lineTo(780, 654); c.moveTo(780, 667); c.lineTo(767, 667); c.stroke();
+      q.options.forEach((o, i) => {
+        const y = OY + i * OG, wrong = s.wrong === i, right = s.right === i;
+        card(c, 72, y, 774, OH, 40, wrong ? MQ.redFill : right ? MQ.greenFill : MQ.white, { shadow: 0, stroke: wrong ? MQ.red : right ? MQ.green : MQ.ink, lw: wrong || right ? 7 : 5 });
+        c.fillStyle = MQ.ink;
+        if (o.frac) { font(c, 400, 54, SERIF); frac(c, o.frac[0], o.frac[1], 108, y + OH / 2 + 6, 54); }
+        else { font(c, 400, 40, "Inter"); c.fillText(o.text, 110, y + OH / 2 + 14); }
+        if (wrong || right) { c.fillStyle = wrong ? MQ.red : MQ.green; c.beginPath(); c.arc(790, y + OH / 2, 26, 0, 7); c.fill();
+          c.strokeStyle = "#fff"; c.lineWidth = 6; c.lineCap = "round"; c.beginPath();
+          if (wrong) { c.moveTo(780, y + OH / 2 - 10); c.lineTo(800, y + OH / 2 + 10); c.moveTo(800, y + OH / 2 - 10); c.lineTo(780, y + OH / 2 + 10); }
+          else { c.moveTo(778, y + OH / 2); c.lineTo(787, y + OH / 2 + 10); c.lineTo(803, y + OH / 2 - 10); }
+          c.stroke(); }
+      });
+      // feedback card under the question card
+      const fy = 398 + cardH + 40;
+      const fb = s.good ? { col: MQ.green, fill: MQ.greenFill, lines: q.good } : s.why ? { col: MQ.red, fill: MQ.redFill, lines: q.why } : null;
+      if (fb) {
+        const a = s.fbIn ?? 1; c.globalAlpha = a; c.save(); c.translate(0, (1 - a) * 60);
+        card(c, 36, fy, 846, 300, 44, MQ.cream, { shadow: 10 });
+        c.fillStyle = fb.col; c.beginPath(); c.arc(100, fy + 74, 30, 0, 7); c.fill();
+        font(c, 800, 44); c.fillStyle = fb.col; c.fillText(fb.lines[0], 148, fy + 90);
+        font(c, 500, 34); c.fillStyle = MQ.ink; c.fillText(fb.lines[1], 72, fy + 160);
+        card(c, 72, fy + 196, 774, 76, 38, s.good ? MQ.navy : MQ.cream, { shadow: 6, lw: 4 });
+        font(c, 700, 32); c.fillStyle = s.good ? "#fff" : MQ.ink; c.textAlign = "center";
+        c.fillText(s.good ? "Next question →" : "Try again", 459, fy + 246); c.textAlign = "left";
+        if (s.good) { card(c, 676, fy + 46, 170, 60, 30, MQ.bg, { shadow: 4, lw: 4 }); font(c, 800, 30); c.fillStyle = MQ.navy; c.fillText("+20 XP", 702, fy + 87); }
+        c.restore(); c.globalAlpha = 1;
+      }
+      if (s.tap) { const [x, y] = s.tap.xy; c.fillStyle = `rgba(20,20,20,${0.25 * (1 - s.tap.p)})`; c.beginPath(); c.arc(x, y, 30 + s.tap.p * 50, 0, 7); c.fill(); }
+      c.restore();
+    }
+    const optMid = i => OY + i * OG + OH / 2;
+    return { draw, markPoint: i => toCanvas(790, optMid(i)), optionPoint: i => [459, optMid(i)] };
+  }
+  // Phone script: the real "5 a day" screenshot, tap Start, push to the question, tap wrong, tap right.
+  // T = {start, push, wrong, right}; returns an update(t) that redraws the phone screen.
+  function mqScript(ph, quiz, img, T) {
+    const startXY = [459 * 918 / 919, 1150 * SY]; // Start button in the screenshot, drawn full-canvas
+    return t => {
+      const push = smooth(prog(t, T.push, T.push + 0.4));
+      const tapAt = (at, xy) => t >= at && t < at + 0.4 ? { xy, p: prog(t, at, at + 0.4) } : null;
+      const s = { wrong: t >= T.wrong ? 0 : -1, right: t >= T.right ? 1 : -1, why: t >= T.wrong + 0.25 && t < T.right, good: t >= T.right + 0.25,
+        fbIn: outCubic(t >= T.right + 0.25 ? prog(t, T.right + 0.25, T.right + 0.55) : prog(t, T.wrong + 0.25, T.wrong + 0.55)),
+        tap: tapAt(T.wrong, quiz.optionPoint(0)) || tapAt(T.right, quiz.optionPoint(1)) };
+      const moving = push > 0 && push < 1, anim = moving || s.tap || (s.fbIn > 0 && s.fbIn < 1) || (t >= T.start && t < T.start + 0.4);
+      ph.screen.tex.redraw((c, w, h) => {
+        c.save(); roundRect(c, 0, 0, w, h, 96); c.clip();
+        if (push < 1) {
+          c.save(); c.translate(-push * w * 0.3, 0); c.drawImage(img, 0, 0, w, h);
+          const tp = prog(t, T.start, T.start + 0.4);
+          if (tp > 0 && tp < 1) { c.fillStyle = `rgba(255,255,255,${0.35 * (1 - tp)})`; c.beginPath(); c.arc(startXY[0], startXY[1], 40 + tp * 160, 0, 7); c.fill(); }
+          c.fillStyle = `rgba(0,0,0,${push * 0.3})`; c.fillRect(0, 0, w, h); c.restore();
+        }
+        if (push > 0) { c.save(); c.translate((1 - push) * w, 0); quiz.draw(c, w, h, s); c.restore(); }
+        c.restore();
+      }, anim ? t.toFixed(3) : JSON.stringify([push > 0, s.wrong, s.right, s.why, s.good]));
+    };
+  }
+  function loadImage(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+  async function loadBrand(base) {
+    const ff = new FontFace("Bricolage", `url(${base}fonts/BricolageGrotesque.ttf)`, { weight: "200 800", stretch: "75% 100%" });
+    document.fonts.add(await ff.load());
+    return { fiveADay: await loadImage(`${base}assets/five-a-day.png`), startPoint: [459 * 918 / 919, 1150 * SY] };
+  }
+
   // convert a phone-screen canvas point to a world position
   function screenPoint(ph, cx, cy) {
     const v = new THREE.Vector3((cx / 918 - 0.5) * 3.06, (0.5 - cy / 1968) * 6.56, 0.2);
     ph.updateWorldMatrix(true, false); return ph.localToWorld(v).toArray();
   }
 
-  window.Kit = { W, H, C, clamp, prog, smooth, outCubic, outBack, lerp, lerp3, rng, el, canvasTex, plane, frac, roundRect, roundedBox, mats, phone, quiz, screenPoint, stage };
+  window.Kit = { W, H, C, clamp, prog, smooth, outCubic, outBack, lerp, lerp3, rng, el, canvasTex, plane, frac, roundRect, roundedBox, mats, phone, mqQuestion, mqScript, loadBrand, screenPoint, stage };
 })();
