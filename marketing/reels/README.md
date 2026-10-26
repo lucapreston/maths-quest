@@ -17,6 +17,14 @@ NODE_PATH=$(npm root -g) node render.js neg-times-neg/reel.html /tmp/frame 30 2.
 
 Needs Playwright (Chromium) and ffmpeg. A full reel takes a few minutes.
 
+Sound effects are cue lists in each reel (`window.SFX = [[time, sound, gain], ...]`), synthesised by `sfx.js`
+(whoosh, swipe, pop, tick, hop, thud, tap, flip, scratch, stamp, ding, wrong, sparkle, shuffle) and mixed in
+while rendering. To change only the sound on an existing video:
+
+```sh
+NODE_PATH=$(npm root -g) node render.js neg-times-neg/reel.html neg-times-neg/maths-quest-neg-times-neg.mp4 30 --audio
+```
+
 ## Preview live
 
 Serve this folder over HTTP (image textures don't load from `file://`), then open a reel:

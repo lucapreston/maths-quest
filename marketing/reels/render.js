@@ -1,10 +1,13 @@
 // Render a reel page to MP4 (or PNG stills) by seeking it frame by frame in headless Chromium.
-// usage: node render.js <reel.html> <out.mp4|out-prefix> [fps=30] [stills: t1,t2,...]
+// usage: node render.js <reel.html> <out.mp4|out-prefix> [fps=30] [stills: t1,t2,... | --audio]
+// A page may set window.SFX = [[time, sound, gain?], ...] (sounds in sfx.js); they are mixed into the MP4.
+// --audio re-mixes the sound onto an existing <out.mp4> without re-rendering the video.
 // Pages are served over a local HTTP server (rooted at this folder) so images can be used as WebGL
 // textures; file:// would taint the canvas.
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
-const http = require('http'), fs = require('fs'), path = require('path');
+const http = require('http'), fs = require('fs'), path = require('path'), os = require('os');
+const sfx = require('./sfx');
 const [,, html, out, fps = 30, only] = process.argv;
 
 const ROOT = __dirname;
@@ -29,13 +32,24 @@ function serve() {
   // pages that load assets set READY=false until they are ready to draw
   await p.waitForFunction(() => window.READY !== false, null, { timeout: 60000 });
   const dur = await p.evaluate(() => window.DURATION);
-  if (only) {
+  const events = await p.evaluate(() => window.SFX || null);
+  const wav = events && path.join(os.tmpdir(), `reel-sfx-${process.pid}.wav`);
+  if (wav) fs.writeFileSync(wav, sfx.mix(events, dur));
+  const audioArgs = wav ? ['-i', wav, '-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '160k', '-shortest'] : [];
+  if (only === '--audio') {
+    if (!wav) throw new Error('page has no window.SFX');
+    const tmp = out.replace(/\.mp4$/, '.tmp.mp4');
+    await new Promise((r, j) => spawn('ffmpeg', ['-y', '-loglevel', 'error', '-i', out, ...audioArgs, '-c:v', 'copy', '-movflags', '+faststart', tmp], { stdio: 'inherit' })
+      .on('close', c => c ? j(new Error('ffmpeg failed')) : r()));
+    fs.renameSync(tmp, out);
+  } else if (only) {
     for (const t of only.split(',')) { await p.evaluate(t => seek(t), +t); await p.screenshot({ path: `${out}-${t}.png` }); }
   } else {
-    const ff = spawn('ffmpeg', ['-y', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', '-movflags', '+faststart', out], { stdio: ['pipe', 'ignore', 'inherit'] });
+    const ff = spawn('ffmpeg', ['-y', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-', ...audioArgs, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', '-movflags', '+faststart', out], { stdio: ['pipe', 'ignore', 'inherit'] });
     const n = Math.round(dur * fps);
     for (let i = 0; i < n; i++) { await p.evaluate(t => seek(t), i / fps); ff.stdin.write(await p.screenshot({ type: 'png' })); }
     ff.stdin.end(); await new Promise(r => ff.on('close', r));
   }
+  if (wav) fs.unlinkSync(wav);
   await b.close(); server.close();
 })();
