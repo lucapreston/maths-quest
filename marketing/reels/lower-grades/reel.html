@@ -3,231 +3,243 @@
 <head>
 <meta charset="utf-8">
 <title>Maths Quest Reel</title>
-<style>
-  :root {
-    --bg: #0b0d14; --ink: #f5f6fa; --dim: #8a90a6; --gold: #ffd23f;
-    --neg: #ff5c7a; --pos: #3ee08f; --card: #161a26; --line: #2a3043;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
-  body { font-family: "Inter Display", Inter, sans-serif; color: var(--ink); position: relative; }
-  .abs { position: absolute; left: 0; right: 0; }
-  .center { text-align: center; }
-  .gold { color: var(--gold); } .neg { color: var(--neg); } .pos { color: var(--pos); } .dim { color: var(--dim); }
-  .glow { position: absolute; width: 1400px; height: 1400px; left: -160px; top: 120px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,210,63,0.13), rgba(255,210,63,0) 60%); }
-  .progress { position: absolute; left: 0; top: 0; height: 10px; background: var(--gold); }
-  .scene { position: absolute; inset: 0; }
-  .tag { position: absolute; top: 120px; left: 0; right: 0; text-align: center; font: 600 34px Inter; letter-spacing: 6px;
-    color: var(--dim); text-transform: uppercase; }
-  .hook { top: 540px; padding: 0 70px; font-weight: 900; font-size: 118px; line-height: 1.04; letter-spacing: -3px; }
-  .hook .w { display: inline-block; margin-right: 26px; }
-  .sub { top: 1260px; font: 500 46px Inter; color: var(--dim); padding: 0 80px; }
-  .title { top: 230px; padding: 0 70px; font-weight: 900; font-size: 84px; line-height: 1.06; letter-spacing: -2px; }
-  .num { color: var(--gold); }
-  .caption { padding: 0 80px; font-weight: 800; font-size: 60px; line-height: 1.15; }
-  .small { font: 500 34px Inter; color: var(--dim); }
-  .card { position: absolute; left: 90px; right: 90px; background: var(--card); border: 3px solid var(--line); border-radius: 44px; padding: 44px 50px; }
-  .math { font: 700 50px "JetBrains Mono", monospace; }
-  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.82em; margin: 0 6px; }
-  .frac > span:last-child { border-top: 4px solid currentColor; padding-top: 4px; }
-  .wl { display: flex; justify-content: space-between; align-items: center; height: 116px; border-bottom: 2px dashed var(--line); }
-  .wl:last-child { border-bottom: none; }
-  .mk { font: 800 40px Inter; padding: 8px 20px; border-radius: 16px; }
-  .mk.ok { color: var(--pos); background: rgba(62,224,143,.12); }
-  .mk.no { color: var(--neg); background: rgba(255,92,122,.12); }
-  .score { position: absolute; left: 0; right: 0; text-align: center; font: 900 190px "Inter Display"; letter-spacing: -6px; }
-  .duo { position: absolute; left: 70px; right: 70px; top: 620px; display: flex; gap: 40px; }
-  .duo .card { position: relative; left: auto; right: auto; flex: 1; height: 560px; display: flex; flex-direction: column; justify-content: space-between; padding: 50px 40px; }
-  .duo h3 { font-size: 58px; font-weight: 900; line-height: 1.05; letter-spacing: -1px; }
-  .verdict { font: 800 44px Inter; line-height: 1.2; }
-  .icon { font: 900 120px "Inter Display"; line-height: 1; }
-  .chip { position: absolute; left: 90px; right: 90px; background: var(--card); border: 3px solid var(--neg); border-radius: 32px; padding: 30px 40px;
-    display: flex; justify-content: space-between; align-items: center; }
-  .chip .math { white-space: nowrap; }
-  .chip .why { font: 700 36px Inter; color: var(--neg); text-align: right; max-width: 440px; line-height: 1.2; }
-  .cta-title { top: 200px; font-weight: 900; font-size: 120px; letter-spacing: -4px; }
-  .cta-sub { top: 360px; font: 600 42px Inter; color: var(--dim); padding: 0 60px; line-height: 1.35; }
-  .phone { position: absolute; left: 150px; top: 560px; width: 780px; height: 840px; border-radius: 64px;
-    background: var(--card); border: 3px solid var(--line); padding: 50px 46px; box-shadow: 0 40px 120px rgba(0,0,0,.6); }
-  .pill { display: inline-block; padding: 10px 22px; border-radius: 999px; background: #22283a; color: var(--dim); font: 600 26px Inter; margin-right: 10px; }
-  .qtext { margin: 30px 0 26px; font: 700 40px Inter; line-height: 1.35; }
-  .opt { border: 3px solid var(--line); border-radius: 26px; padding: 14px 30px; font: 700 44px "JetBrains Mono"; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; height: 118px; }
-  .opt.right { border-color: var(--pos); background: rgba(62,224,143,.12); }
-  .opt.wrong { border-color: var(--neg); background: rgba(255,92,122,.10); }
-  .why-bubble { position: absolute; left: 46px; right: 46px; bottom: 44px; border-radius: 26px; padding: 22px 28px; background: rgba(255,92,122,.14);
-    border: 2px solid var(--neg); font: 600 32px Inter; line-height: 1.3; }
-  .cta-btn { position: absolute; left: 140px; right: 140px; top: 1600px; height: 150px; border-radius: 999px; background: var(--gold);
-    color: #11131a; font: 900 56px "Inter Display"; display: flex; align-items: center; justify-content: center; letter-spacing: -1px; }
-  .handle { top: 1790px; font: 600 34px Inter; color: var(--dim); }
-</style>
+<script src="../lib/three.min.js"></script>
+<script src="../lib/kit.js"></script>
 </head>
 <body>
-<div class="glow" id="glow"></div>
-<div class="progress" id="progress"></div>
-
-<!-- SCENE 1: hook (0 – 3.2) -->
-<div class="scene" id="s1">
-  <div class="tag">Maths Quest · exam tips</div>
-  <div class="abs hook center" id="hook"></div>
-  <div class="abs sub center" id="hooksub">(it's probably not because you're bad at maths)</div>
-</div>
-
-<!-- SCENE 2: method marks (3.2 – 11.6) -->
-<div class="scene" id="s2">
-  <div class="tag">Reason 1</div>
-  <div class="abs title center">You're throwing away<br><span class="gold">method marks</span></div>
-  <div class="card" style="top:520px">
-    <div class="small" style="margin-bottom:16px">Edexcel A-level specimen · Paper 1 · 3 marks</div>
-    <div class="math" style="font-size:44px">f(x) = <span class="frac"><span>3x−5</span><span>x+1</span></span>&nbsp; Find f⁻¹(x)</div>
-  </div>
-  <div class="card" id="work" style="top:850px; padding: 20px 50px">
-    <div class="wl" id="w0"><span class="math">y(x+1) = 3x−5</span><span class="mk ok" id="m0">M1 ✓</span></div>
-    <div class="wl" id="w1"><span class="math">xy+y = 3x−5</span><span></span></div>
-    <div class="wl" id="w2"><span class="math">y+5 = x(3−y)</span><span class="mk ok" id="m2">M1 ✓</span></div>
-    <div class="wl" id="w3"><span class="math">f⁻¹(x) = <span class="frac"><span>x+5</span><span>x−3</span></span></span><span class="mk no" id="m3">A1 ✗</span></div>
-  </div>
-  <div class="score" id="score" style="top:1430px"></div>
-  <div class="abs caption center" id="cap2" style="top:1660px"></div>
-</div>
-
-<!-- SCENE 3: re-reading (11.6 – 16.8) -->
-<div class="scene" id="s3">
-  <div class="tag">Reason 2</div>
-  <div class="abs title center">You <span class="gold">re-read</span> instead<br>of testing yourself</div>
-  <div class="duo">
-    <div class="card" id="cA">
-      <div class="icon neg">✗</div>
-      <h3>Re-reading notes</h3>
-      <div class="verdict dim">Feels like revision</div>
-    </div>
-    <div class="card" id="cB">
-      <div class="icon pos">✓</div>
-      <h3>Doing exam questions</h3>
-      <div class="verdict pos">Actually is revision</div>
-    </div>
-  </div>
-  <div class="abs caption center" id="cap3" style="top:1300px">Testing yourself beats<br>re-reading.<br><span class="small" style="font-size:40px">One of the most replicated findings in learning science.</span></div>
-</div>
-
-<!-- SCENE 4: repeat mistakes (16.8 – 21.4) -->
-<div class="scene" id="s4">
-  <div class="tag">Reason 3</div>
-  <div class="abs title center">You make the<br><span class="gold">same mistake</span> twice</div>
-  <div class="chip" id="k0" style="top:560px"><span class="math"><span class="frac"><span>x+5</span><span>x−3</span></span></span><span class="why">sign error</span></div>
-  <div class="chip" id="k1" style="top:765px"><span class="math">g(x) ≥ −2.25</span><span class="why">ignored the restricted domain</span></div>
-  <div class="chip" id="k2" style="top:935px"><span class="math"><span class="frac"><span>x+1</span><span>3x−5</span></span></span><span class="why">found 1/f(x), not f⁻¹(x)</span></div>
-  <div class="abs caption center" id="cap4" style="top:1260px">If you don't know <span class="gold">which</span> mistake you made,<br>you'll make it again.</div>
-</div>
-
-<!-- SCENE 5: CTA (21.4 – 28) -->
-<div class="scene" id="s5">
-  <div class="abs cta-title center">Maths <span class="gold">Quest</span></div>
-  <div class="abs cta-sub center">8,000+ real GCSE &amp; A-level exam questions.<br>Every wrong answer tells you <span class="gold">why</span>.</div>
-  <div class="phone" id="phone">
-    <span class="pill">A-level</span><span class="pill">Edexcel</span><span class="pill">3 marks</span>
-    <div class="qtext">f(x) = (3x−5)/(x+1). Find f⁻¹(x).</div>
-    <div class="opt" id="o0"><span class="frac"><span>x+5</span><span>x−3</span></span><span id="o0m"></span></div>
-    <div class="opt" id="o1"><span class="frac"><span>x+5</span><span>3−x</span></span><span id="o1m"></span></div>
-    <div class="opt" id="o2"><span class="frac"><span>x+1</span><span>3x−5</span></span><span></span></div>
-    <div class="why-bubble" id="bubble"><b class="neg">Sign error:</b> −(x+5)/(x−3) = (x+5)/(3−x)</div>
-  </div>
-  <div class="cta-btn" id="btn">Get Maths Quest free</div>
-  <div class="abs handle center">link in bio</div>
-</div>
-
 <script>
-const DURATION = 28;
-const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
-const prog = (t, a, b) => clamp((t - a) / (b - a));
-const outCubic = x => 1 - Math.pow(1 - x, 3);
-const outBack = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
-const $ = id => document.getElementById(id);
-const fade = (t, a, b, inDur = 0.35, outDur = 0.35) => Math.min(prog(t, a, a + inDur), 1 - prog(t, b - outDur, b));
-function setText(id, html) { const el = $(id); if (el._h !== html) { el.innerHTML = html; el._h = html; } }
-// pop-in: opacity + slide up with overshoot
-function pop(el, t, at, dist = 50, dur = 0.4) {
-  const p = prog(t, at, at + dur);
-  el.style.opacity = p;
-  el.style.transform = `translateY(${(1 - outBack(p)) * dist}px)`;
+const K = Kit, { prog, smooth, outBack, outCubic, lerp, C } = K;
+
+const Y3 = -14, Y4 = -28, Y5 = -42;
+const INK = "#2747a8", RED = "#e0284f", GREEN = "#12a35c";
+const HAND = 'italic 600 64px Caladea';
+
+const S = K.stage({
+  duration: 28,
+  captionBox: true,
+  captions: [
+    [0.0, 1.5, `Why are your maths grades`],
+    [1.5, 3.2, `<span class="neg">lower</span> than they should be?`],
+    [3.2, 4.6, `Reason 1: you're throwing away <span class="gold">method marks.</span>`],
+    [4.6, 6.6, `Answer only. Wrong. <span class="neg">0 marks.</span>`],
+    [6.6, 8.6, `Now show the <span class="gold">working…</span>`],
+    [8.6, 11.6, `Same wrong answer. <span class="pos">2 marks.</span>`],
+    [11.6, 12.9, `Reason 2: you <span class="gold">re-read</span> your notes.`],
+    [12.9, 13.9, `It <span class="neg">feels</span> like revision.`],
+    [13.9, 15.3, `Testing yourself <span class="pos">actually is.</span>`],
+    [15.3, 16.8, `One of the most <span class="gold">proven</span> ideas in learning science.`],
+    [16.8, 18.6, `Reason 3: you make the <span class="neg">same mistake</span> twice.`],
+    [18.6, 20.0, `Every wrong answer has a <span class="gold">reason.</span>`],
+    [20.0, 21.4, `Know it, and you <span class="pos">won't repeat it.</span>`],
+    [21.6, 23.3, `8,000+ real <span class="gold">GCSE &amp; A-level</span> exam questions.`, 1500],
+    [23.3, 25.4, `Every wrong answer tells you <span class="gold">why.</span>`, 1500],
+    [25.4, 28.01, `Maths <span class="gold">Quest</span>`, 1440],
+  ],
+});
+const { scene } = S;
+
+// canvas point on a textured plane → world position
+function planePoint(mesh, cx, cy, pw, ph, w, h) {
+  mesh.updateWorldMatrix(true, false);
+  return mesh.localToWorld(new THREE.Vector3((cx / pw - 0.5) * w, (0.5 - cy / ph) * h, 0.01)).toArray();
+}
+function writeOn(c, text, x, y, p, font = HAND, color = INK) {
+  if (p <= 0) return;
+  c.save(); c.font = font; c.fillStyle = color;
+  const w = c.measureText(text).width;
+  c.beginPath(); c.rect(x - 10, y - 90, (w + 20) * p, 130); c.clip(); c.fillText(text, x, y); c.restore();
+}
+function ringMark(c, x, y, r, color, text, font) {
+  c.save(); c.strokeStyle = color; c.lineWidth = 7; c.beginPath(); c.ellipse(x, y, r * 1.15, r, -0.12, 0, Math.PI * 2); c.stroke();
+  c.fillStyle = color; c.font = font; c.textAlign = "center"; c.fillText(text, x, y + r * 0.36); c.restore();
 }
 
-const hookWords = ["Why", "are", "your", "maths", "grades", '<span class="gold">lower</span>', "than", "they", "should", "be?"];
-$("hook").innerHTML = hookWords.map(w => `<span class="w">${w}</span>`).join("");
-const hookEls = [...document.querySelectorAll("#hook .w")];
+// ---------- shots 1–2: the exam paper ----------
+const PW = 1020, PH = 1440, PAPER_W = 3.4, PAPER_H = 4.8;
+const paper = new THREE.Group(); paper.scale.setScalar(0.72); scene.add(paper);
+paper.add(new THREE.Mesh(new THREE.BoxGeometry(PAPER_W, PAPER_H, 0.03), K.mats.paper()));
+const cover = K.plane(PAPER_W, PAPER_H, PW, PH, (c, w, h) => {
+  c.fillStyle = "#f3f4f8"; c.fillRect(0, 0, w, h);
+  c.fillStyle = "#1b2238"; c.fillRect(0, 0, w, 150);
+  c.fillStyle = "#fff"; c.font = '800 54px Inter'; c.fillText("GCSE Mathematics", 70, 98);
+  c.fillStyle = "#1b2238"; c.font = '800 72px "Inter Display"'; c.fillText("Paper 1", 70, 300);
+  c.font = '500 40px Inter'; c.fillStyle = "#6b7189"; c.fillText("Non-calculator · 1 hour 30 minutes", 70, 360);
+  c.strokeStyle = "#c5c9d6"; c.lineWidth = 3;
+  ["Candidate name", "Centre number", "Candidate number"].forEach((l, i) => { c.fillStyle = "#6b7189"; c.font = '500 34px Inter'; c.fillText(l, 70, 480 + i * 110); c.strokeRect(430, 438 + i * 110, 520, 64); });
+  c.fillStyle = "#dfe2ea"; for (let i = 0; i < 9; i++) c.fillRect(70, 820 + i * 50, i % 3 === 2 ? 520 : 860, 20);
+  c.font = '500 36px Inter'; c.fillStyle = "#6b7189"; c.fillText("Target grade", 600, 1250);
+  ringMark(c, 820, 1330, 70, RED, "4", 'italic 800 130px Caladea');
+  c.fillStyle = RED; c.font = 'italic 600 54px Caladea'; c.fillText("Grade", 560, 1355);
+  c.fillStyle = INK; c.font = 'italic 700 64px Caladea'; c.fillText("6", 870, 1252);
+}, { lit: true });
+cover.position.z = 0.016; paper.add(cover);
 
-function render(t) {
-  $("progress").style.width = (clamp(t / DURATION) * 1080) + "px";
-  $("glow").style.transform = `translate(${Math.sin(t * 0.6) * 60}px, ${Math.cos(t * 0.5) * 80}px)`;
-
-  // ----- SCENE 1 -----
-  $("s1").style.opacity = fade(t, -1, 3.2, 0.01, 0.3);
-  hookEls.forEach((el, i) => {
-    const p = prog(t, 0.05 + i * 0.11, 0.35 + i * 0.11);
-    el.style.opacity = p;
-    el.style.transform = `translateY(${(1 - outBack(p)) * 60}px) scale(${0.85 + 0.15 * outBack(p)})`;
+const back = K.plane(PAPER_W, PAPER_H, PW, PH, () => {}, { lit: true });
+back.rotation.y = Math.PI; back.position.z = -0.016; paper.add(back);
+const LINES = [
+  { y: 600, text: "y(x + 1) = 3x − 5", at: 6.6, mark: 7.0 },
+  { y: 730, text: "xy + y = 3x − 5", at: 7.2 },
+  { y: 860, text: "y + 5 = x(3 − y)", at: 7.8, mark: 8.2 },
+];
+function drawQuestion(c, w, h, t) {
+  c.fillStyle = "#f3f4f8"; c.fillRect(0, 0, w, h);
+  c.fillStyle = "#6b7189"; c.font = '500 32px Inter'; c.fillText("Edexcel A-level · Specimen Paper 1", 70, 90);
+  c.fillStyle = "#1b2238"; c.font = '800 46px Inter'; c.fillText("Question 10", 70, 160);
+  c.font = '600 58px Inter'; c.fillText("f(x) =", 70, 290); K.frac(c, "3x − 5", "x + 1", 265, 275, 62);
+  c.fillText("Find f⁻¹(x).", 70, 410); c.fillStyle = "#6b7189"; c.fillText("(3)", 640, 410);
+  c.fillStyle = "#c5c9d6"; c.fillRect(70, 470, 880, 4); c.fillRect(780, 500, 3, 640);
+  LINES.forEach(L => {
+    writeOn(c, L.text, 90, L.y, prog(t, L.at, L.at + 0.55));
+    if (L.mark && t >= L.mark) { c.fillStyle = GREEN; c.font = '800 46px Inter'; c.fillText("M1 ✓", 810, L.y); }
   });
-  hookEls[5].style.transform += ` scale(${1 + Math.sin(prog(t, 1.3, 1.7) * Math.PI) * 0.14})`;
-  $("hooksub").style.opacity = prog(t, 1.6, 2.0);
-
-  // ----- SCENE 2 -----
-  // phase A: only the final (wrong) answer → 0/3. phase B: working appears → 2/3.
-  $("s2").style.opacity = fade(t, 3.2, 11.6, 0.3, 0.4);
-  const workOn = t >= 6.6;
-  ["w0", "w1", "w2"].forEach((id, i) => {
-    const el = $(id);
-    if (!workOn) { el.style.display = "none"; return; }
-    el.style.display = "flex"; pop(el, t, 6.6 + i * 0.6, 30);
-  });
-  $("w3").style.opacity = prog(t, 3.6, 3.9);
-  pop($("m0"), t, 6.9, 20, 0.3); pop($("m2"), t, 8.1, 20, 0.3); pop($("m3"), t, 4.6, 20, 0.3);
-  let sc = "", cap = "";
-  if (t >= 4.9 && t < 6.6) { sc = `<span class="neg">0/3</span>`; cap = `Answer only. Wrong. <span class="neg">Zero marks.</span>`; }
-  if (t >= 8.5) { sc = `<span class="pos">2/3</span>`; cap = `Same wrong answer.<br>Show the working: <span class="pos">2 marks.</span>`; }
-  if (t >= 6.6 && t < 8.5) cap = `Now show the working…`;
-  setText("score", sc); setText("cap2", cap);
-  const sp = t >= 8.5 ? prog(t, 8.5, 8.9) : prog(t, 4.9, 5.3);
-  $("score").style.transform = `scale(${0.5 + 0.5 * outBack(sp)})`; $("score").style.opacity = sp;
-
-  // ----- SCENE 3 -----
-  $("s3").style.opacity = fade(t, 11.6, 16.8, 0.3, 0.4);
-  pop($("cA"), t, 12.1, 80); pop($("cB"), t, 13.1, 80);
-  const dimA = prog(t, 13.6, 14.0);
-  $("cA").style.opacity = Math.min(prog(t, 12.1, 12.5), 1 - dimA * 0.55);
-  $("cB").style.borderColor = dimA > 0.5 ? "var(--pos)" : "var(--line)";
-  pop($("cap3"), t, 14.2, 30);
-
-  // ----- SCENE 4 -----
-  $("s4").style.opacity = fade(t, 16.8, 21.4, 0.3, 0.4);
-  ["k0", "k1", "k2"].forEach((id, i) => {
-    const p = prog(t, 17.3 + i * 0.7, 17.7 + i * 0.7);
-    $(id).style.opacity = p;
-    $(id).style.transform = `translateX(${(1 - outBack(p)) * (i % 2 ? 120 : -120)}px) rotate(${(1 - p) * (i % 2 ? 3 : -3)}deg)`;
-  });
-  pop($("cap4"), t, 19.6, 30);
-
-  // ----- SCENE 5 -----
-  const s5 = prog(t, 21.4, 21.8);
-  $("s5").style.opacity = s5;
-  $("s5").style.transform = `scale(${0.96 + 0.04 * outCubic(s5)})`;
-  const ph = outBack(prog(t, 21.7, 22.3));
-  $("phone").style.transform = `translateY(${(1 - ph) * 200}px) rotate(${(1 - ph) * -4}deg)`;
-  $("phone").style.opacity = prog(t, 21.7, 22.0);
-  const wrongOn = t >= 23.0, rightOn = t >= 24.8;
-  $("o0").className = "opt" + (wrongOn ? " wrong" : ""); setText("o0m", wrongOn ? "✗" : "");
-  $("o1").className = "opt" + (rightOn ? " right" : ""); setText("o1m", rightOn ? "✓" : "");
-  pop($("bubble"), t, 23.3, 30);
-  const b = prog(t, 25.4, 25.8);
-  $("btn").style.opacity = b;
-  $("btn").style.transform = `scale(${0.8 + 0.2 * outBack(b) + (t > 26 ? Math.sin((t - 26) * 4) * 0.025 : 0)})`;
+  // the final (wrong) answer is always there
+  c.save(); c.font = HAND; c.fillStyle = INK; c.fillText("f⁻¹(x) =", 90, 1010); K.frac(c, "x + 5", "x − 3", 350, 990, 64); c.restore();
+  if (t >= 4.6) { c.fillStyle = RED; c.font = '800 46px Inter'; c.fillText("A1 ✗", 810, 1010); }
+  if (t >= 4.9 && t < 8.6) ringMark(c, 880, 230, 72, RED, "0/3", 'italic 800 64px Caladea');
+  if (t >= 8.6) ringMark(c, 880, 230, 72, GREEN, "2/3", 'italic 800 64px Caladea');
 }
-window.DURATION = DURATION;
-window.seek = t => render(t);
-// live preview when opened in a browser
-if (!navigator.webdriver) {
-  const t0 = performance.now();
-  (function loop() { render(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); })();
-} else render(0);
+// the paper's own half-turn cancels the back face's, so canvas coords map straight through
+const bp = (cx, cy) => () => planePoint(back, cx, cy, PW, PH, PAPER_W, PAPER_H);
+S.ring(1.7, 3.0, () => planePoint(cover, 820, 1330, PW, PH, PAPER_W, PAPER_H), 120);
+S.ring(4.7, 5.9, bp(860, 995), 95);
+S.ring(7.05, 7.9, bp(860, 585), 95);
+S.ring(8.25, 8.9, bp(860, 845), 95);
+S.ring(8.7, 10.4, bp(880, 230), 120);
+
+// ---------- shot 3: re-reading vs testing ----------
+const book = new THREE.Group(); book.position.set(-1.9, Y3, 0); scene.add(book);
+const coverMat = new THREE.MeshStandardMaterial({ color: 0x3a4f9a, metalness: 0.2, roughness: 0.5 });
+const notes = (c, w, h) => {
+  c.fillStyle = "#f7f3e8"; c.fillRect(0, 0, w, h);
+  c.fillStyle = "#c9c2ae"; for (let i = 0; i < 14; i++) c.fillRect(40, 70 + i * 52, i % 4 === 3 ? 200 : 360, 12);
+  c.fillStyle = "rgba(255,230,0,.55)"; [1, 2, 5, 9, 10].forEach(i => c.fillRect(30, 56 + i * 52, 380, 34));
+};
+function bookHalf(side) {
+  const g = new THREE.Group();
+  const cv = new THREE.Mesh(K.roundedBox(1.7, 2.3, 0.08, 0.03), coverMat); cv.position.set(side * 0.85, 0, -0.08);
+  const pg = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.2, 0.1), K.mats.paper()); pg.position.set(side * 0.82, 0, 0);
+  const face = K.plane(1.56, 2.16, 440, 800, notes, { lit: true }); face.position.set(side * 0.82, 0, 0.051);
+  g.add(cv, pg, face); return g;
+}
+const bookL = bookHalf(-1), bookR = bookHalf(1); book.add(bookL, bookR);
+const greyCol = new THREE.Color(0x3b3f4c), blueCol = new THREE.Color(0x3a4f9a);
+
+const stack = new THREE.Group(); stack.position.set(1.9, Y3, 0); scene.add(stack);
+const sheets = [0, 1, 2, 3].map(i => {
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.7, 2.3, 0.02), K.mats.paper()));
+  const f = K.plane(1.7, 2.3, 340, 460, (c, w, h) => {
+    c.fillStyle = "#f3f4f8"; c.fillRect(0, 0, w, h);
+    c.fillStyle = "#1b2238"; c.font = '800 30px Inter'; c.fillText(`Q${i + 3}`, 26, 50);
+    c.fillStyle = "#c5c9d6"; for (let k = 0; k < 6; k++) c.fillRect(26, 80 + k * 30, k % 3 === 2 ? 160 : 280, 10);
+    c.fillStyle = "#2747a8"; c.font = 'italic 600 34px Caladea'; c.fillText(["x = 7", "y = 2x − 3", "48 cm²", "x = −2, 5"][i], 30, 330);
+    c.fillStyle = "#12a35c"; c.font = '900 64px Inter'; c.fillText("✓", 255, 420);
+  }, { lit: true });
+  f.position.z = 0.011; g.add(f); stack.add(g); return g;
+});
+const sheetGlow = new THREE.Mesh(K.roundedBox(1.9, 2.5, 0.01, 0.005), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0 }));
+sheetGlow.position.z = -0.1; stack.add(sheetGlow);
+
+// ---------- shot 4: repeated mistakes ----------
+const MISTAKES = [
+  { f: ["x + 5", "x − 3"], tag: "sign error" },
+  { t: "g(x) ≥ −2.25", tag: "wrong domain" },
+  { f: ["x + 1", "3x − 5"], tag: "found 1/f(x)" },
+];
+const cards = MISTAKES.map((m, i) => {
+  const g = new THREE.Group();
+  const edge = new THREE.Mesh(K.roundedBox(3.3, 1.12, 0.1, 0.05), new THREE.MeshStandardMaterial({ color: C.neg, emissive: C.neg, emissiveIntensity: 0.5, roughness: 0.4 }));
+  const body = new THREE.Mesh(K.roundedBox(3.24, 1.06, 0.16, 0.05), new THREE.MeshStandardMaterial({ color: 0x10141f, metalness: 0.3, roughness: 0.5 }));
+  const f = K.plane(3.1, 0.95, 930, 285, (c, w, h) => {
+    c.fillStyle = "#f5f6fa"; c.font = '700 58px "JetBrains Mono"';
+    if (m.f) K.frac(c, m.f[0], m.f[1], 40, 150, 72); else c.fillText(m.t, 40, 170);
+    c.textAlign = "right"; c.fillStyle = "#ff6b86"; c.font = '800 52px Inter'; c.fillText(m.tag, w - 40, 165);
+  });
+  f.position.z = 0.085; g.add(edge, body, f); g.edge = edge; g.face = f;
+  scene.add(g); return g;
+});
+const CARD_Y = [1.35, 0, -1.35], CARD_AT = [17.1, 17.6, 18.1];
+S.ring(18.7, 19.9, () => planePoint(cards[0].face, 770, 145, 930, 285, 3.1, 0.95), 110);
+
+// ---------- shot 5: the app ----------
+const quiz = K.quiz({
+  pills: ["A-level", "Edexcel", "3 marks"],
+  question: ["f(x) = (3x − 5)/(x + 1).", "Find f⁻¹(x)."],
+  optionsTop: 560,
+  options: [{ frac: ["x+5", "x−3"] }, { frac: ["x+5", "3−x"] }, { frac: ["x+1", "3x−5"] }],
+  why: ["Sign error:", "−(x+5)/(x−3) = (x+5)/(3−x)"],
+});
+const ph = K.phone(quiz.draw); ph.scale.setScalar(0.78); scene.add(ph);
+S.ring(23.0, 23.8, () => K.screenPoint(ph, ...quiz.markPoint(0)), 75);
+S.ring(24.8, 25.6, () => K.screenPoint(ph, ...quiz.markPoint(1)), 75);
+const btn = K.el("div", "btn", S.ov, "Get Maths Quest free"); btn.style.top = "1620px";
+const bio = K.el("div", "cap dim", S.ov, "link in bio"); bio.style.cssText += "top:1790px;font-size:36px;font-weight:600";
+
+const CAM = [
+  { t: 0, pos: [0, 0.2, 13], look: [0, 0, 0] },
+  { t: 2.9, pos: [0.6, 0, 10.5], look: [0, 0, 0] },
+  { t: 4.4, pos: [0, 0, 9.2], look: [0, 0, 0], dur: 1.2 },
+  { t: 7.2, pos: [-0.1, 0, 8.2], look: [-0.1, 0, 0], dur: 0.6 },
+  { t: 9.2, pos: [0.7, 1.0, 3.6], look: [0.89, 1.18, 0], dur: 0.6 },
+  { t: 11.0, pos: [0.6, 0.9, 3.9], look: [0.89, 1.18, 0] },
+  { t: 12.1, pos: [-1.9, Y3 + 0.6, 9.5], look: [-1.9, Y3, 0], dur: 0.5 },
+  { t: 13.7, pos: [-1.6, Y3 + 0.5, 9.2], look: [-1.8, Y3, 0] },
+  { t: 14.4, pos: [1.9, Y3 + 0.5, 9.0], look: [1.9, Y3, 0], dur: 0.6 },
+  { t: 15.3, pos: [1.8, Y3 + 0.5, 8.6], look: [1.9, Y3, 0] },
+  { t: 16.5, pos: [0, Y3 + 1.0, 13.5], look: [0, Y3, 0], dur: 1.0 },
+  { t: 17.3, pos: [0.6, Y4 + 0.4, 11], look: [0, Y4, 0], dur: 0.5 },
+  { t: 21.4, pos: [-0.4, Y4 + 0.2, 9.2], look: [0, Y4, 0] },
+  { t: 22.1, pos: [0, Y5 + 0.6, 16], look: [0, Y5 + 0.9, 0], dur: 0.6 },
+  { t: 28, pos: [0, Y5 + 0.6, 14.5], look: [0, Y5 + 0.9, 0] },
+];
+
+S.onFrame(t => {
+  S.camPath(t, CAM);
+
+  // paper: floats, then flips to the question side at 3.0
+  const flip = smooth(prog(t, 3.0, 3.7));
+  paper.rotation.set(-0.12 * (1 - flip) + Math.sin(t * 0.9) * 0.03, flip * Math.PI + Math.sin(t * 0.6) * 0.18 * (1 - flip) + Math.sin(t * 0.5) * 0.04, 0.05 * (1 - flip));
+  paper.position.y = Math.sin(t * 1.3) * 0.06;
+  back.tex.redraw((c, w, h) => drawQuestion(c, w, h, t),
+    t < 6.6 || t > 8.4 ? `${t >= 4.6}${t >= 4.9}${t >= 8.6}${t >= 6.6}` : Math.round(t * 30));
+
+  // book: open → closes and greys out
+  const close = smooth(prog(t, 13.1, 13.7));
+  bookR.rotation.y = -close * Math.PI * 0.97;
+  coverMat.color.copy(blueCol).lerp(greyCol, prog(t, 13.3, 13.8));
+  book.rotation.set(-0.25 + Math.sin(t) * 0.03, 0.25, 0);
+  book.scale.setScalar(1 - 0.12 * prog(t, 13.3, 13.8));
+  // stack fans out and glows
+  const fan = outBack(prog(t, 14.0, 14.7));
+  sheets.forEach((g, i) => {
+    const k = i - 1.5;
+    g.position.set(k * 0.35 * fan, Math.abs(k) * -0.08 * fan, i * 0.03);
+    g.rotation.z = -k * 0.16 * fan;
+  });
+  stack.rotation.set(-0.2, -0.25 + Math.sin(t * 0.8) * 0.05, 0);
+  sheetGlow.material.opacity = 0.45 * prog(t, 14.2, 14.8) * (0.8 + 0.2 * Math.sin(t * 4));
+
+  // cards tumble in, edges cool from red to gold once you know the reason
+  cards.forEach((g, i) => {
+    const p = prog(t, CARD_AT[i], CARD_AT[i] + 0.6), e = outBack(p);
+    g.position.set((i - 1) * 0.15, Y4 + CARD_Y[i] + (1 - outCubic(p)) * 6, (1 - p) * 2);
+    g.rotation.set((1 - e) * 1.6 + Math.sin(t * 1.1 + i) * 0.05, Math.sin(t * 0.7 + i) * 0.12, (1 - e) * (i - 1) * 0.8 + (i - 1) * 0.04);
+    const fix = prog(t, 20.0 + i * 0.2, 20.4 + i * 0.2);
+    g.edge.material.color.set(C.neg).lerp(new THREE.Color(C.gold), fix);
+    g.edge.material.emissive.copy(g.edge.material.color);
+  });
+
+  // phone
+  const fly = outCubic(prog(t, 21.5, 22.4));
+  ph.position.set(0, Y5 - (1 - fly) * 7 + Math.sin(t * 1.4) * 0.08, (1 - fly) * -3);
+  ph.rotation.set((1 - fly) * 0.6, lerp(1.4, -0.22, fly) + prog(t, 22.4, 28) * 0.34, (1 - fly) * 0.25);
+  ph.screen.tex.redraw((c, w, h) => quiz.draw(c, w, h, { wrong: t >= 23.0 ? 0 : -1, why: t >= 23.3, right: t >= 24.8 ? 1 : -1, xp: t >= 24.9 }),
+    `${t >= 23.0}${t >= 23.3}${t >= 24.8}${t >= 24.9}`);
+  const b = prog(t, 25.6, 26.0);
+  btn.style.opacity = b; bio.style.opacity = b;
+  btn.style.transform = `scale(${0.8 + 0.2 * outBack(b) + (t > 26 ? Math.sin((t - 26) * 4) * 0.025 : 0)})`;
+});
+document.fonts.ready.then(() => S.start());
 </script>
 </body>
 </html>

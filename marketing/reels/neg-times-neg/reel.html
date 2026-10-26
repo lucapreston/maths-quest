@@ -3,257 +3,193 @@
 <head>
 <meta charset="utf-8">
 <title>Maths Quest Reel</title>
-<style>
-  :root {
-    --bg: #0b0d14; --ink: #f5f6fa; --dim: #8a90a6; --gold: #ffd23f;
-    --neg: #ff5c7a; --pos: #3ee08f; --card: #161a26; --line: #2a3043;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
-  body { font-family: "Inter Display", Inter, sans-serif; color: var(--ink); position: relative; }
-  .abs { position: absolute; left: 0; right: 0; }
-  .center { text-align: center; }
-  .glow { position: absolute; width: 1400px; height: 1400px; left: -160px; top: 120px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,210,63,0.13), rgba(255,210,63,0) 60%); }
-  .tag { position: absolute; top: 120px; left: 0; right: 0; text-align: center; font: 600 34px Inter; letter-spacing: 6px;
-    color: var(--dim); text-transform: uppercase; }
-  .hook { top: 560px; padding: 0 80px; font-weight: 900; font-size: 112px; line-height: 1.04; letter-spacing: -3px; }
-  .hook .w { display: inline-block; margin-right: 26px; }
-  .gold { color: var(--gold); }
-  .sub { top: 1230px; font: 500 46px Inter; color: var(--dim); }
-  .rows { top: 330px; left: 110px; right: 110px; font-family: "JetBrains Mono", monospace; font-weight: 800; }
-  .row { display: flex; justify-content: space-between; align-items: center; height: 128px; font-size: 84px; }
-  .row .eq { color: var(--dim); }
-  .row .ans { min-width: 170px; text-align: right; }
-  .step { position: absolute; right: 30px; font: 700 36px Inter; color: var(--pos); white-space: nowrap; }
-  .caption { top: 1180px; padding: 0 80px; font-weight: 800; font-size: 64px; line-height: 1.15; }
-  .nl { position: absolute; left: 60px; top: 1500px; width: 960px; height: 220px; }
-  .flip { top: 300px; padding: 0 80px; font-weight: 900; font-size: 88px; line-height: 1.08; letter-spacing: -2px; }
-  .arrowbox { position: absolute; left: 0; right: 0; top: 760px; height: 420px; }
-  .cta-title { top: 230px; font-weight: 900; font-size: 120px; letter-spacing: -4px; }
-  .cta-sub { top: 390px; font: 600 42px Inter; color: var(--dim); padding: 0 60px; line-height: 1.35; }
-  .phone { position: absolute; left: 190px; top: 620px; width: 700px; height: 880px; border-radius: 64px;
-    background: var(--card); border: 3px solid var(--line); padding: 56px 48px; box-shadow: 0 40px 120px rgba(0,0,0,.6); }
-  .pill { display: inline-block; padding: 10px 22px; border-radius: 999px; background: #22283a; color: var(--dim); font: 600 26px Inter; margin-right: 10px; }
-  .qtext { margin: 36px 0 34px; font: 700 44px Inter; line-height: 1.3; }
-  .opt { border: 3px solid var(--line); border-radius: 26px; padding: 26px 30px; font: 700 42px "JetBrains Mono"; margin-bottom: 20px; display: flex; justify-content: space-between; }
-  .opt.right { border-color: var(--pos); background: rgba(62,224,143,.12); }
-  .opt.wrong { border-color: var(--neg); background: rgba(255,92,122,.10); }
-  .xp { position: absolute; right: 48px; top: 52px; font: 800 34px Inter; color: var(--gold); }
-  .cta-btn { position: absolute; left: 140px; right: 140px; top: 1600px; height: 150px; border-radius: 999px; background: var(--gold);
-    color: #11131a; font: 900 56px "Inter Display"; display: flex; align-items: center; justify-content: center; letter-spacing: -1px; }
-  .handle { top: 1790px; font: 600 34px Inter; color: var(--dim); }
-  .scene { position: absolute; inset: 0; }
-  .progress { position: absolute; left: 0; top: 0; height: 10px; background: var(--gold); }
-</style>
+<script src="../lib/three.min.js"></script>
+<script src="../lib/kit.js"></script>
 </head>
 <body>
-<div class="glow" id="glow"></div>
-<div class="progress" id="progress"></div>
-
-<!-- SCENE 1: hook -->
-<div class="scene" id="s1">
-  <div class="tag">Maths Quest · quick maths</div>
-  <div class="abs hook center" id="hook"></div>
-  <div class="abs sub center" id="hooksub">(your teacher probably never showed you why)</div>
-</div>
-
-<!-- SCENE 2: the pattern -->
-<div class="scene" id="s2">
-  <div class="tag">Watch the pattern</div>
-  <div class="abs rows" id="rows"></div>
-  <div class="abs caption center" id="cap2"></div>
-  <svg class="nl" id="nl" viewBox="0 0 960 220"></svg>
-</div>
-
-<!-- SCENE 3: intuition -->
-<div class="scene" id="s3">
-  <div class="tag">The intuition</div>
-  <div class="abs flip center" id="flipText">
-    × negative = <span class="gold">turn around</span>
-  </div>
-  <svg class="arrowbox" id="arrows" viewBox="0 0 1080 420"></svg>
-  <div class="abs caption center" id="cap3" style="top:1300px"></div>
-</div>
-
-<!-- SCENE 4: CTA -->
-<div class="scene" id="s4">
-  <div class="abs cta-title center">Maths <span class="gold">Quest</span></div>
-  <div class="abs cta-sub center">8,000+ real GCSE &amp; A-level exam questions.<br>Edexcel &amp; AQA. Every answer explained.</div>
-  <div class="phone" id="phone">
-    <span class="pill">GCSE</span><span class="pill">Edexcel</span><span class="pill">2 marks</span>
-    <div class="xp" id="xp">+20 XP</div>
-    <div class="qtext">Work out (−3) × (−4) − 5</div>
-    <div class="opt wrong" id="o1"><span>−17</span><span id="o1m"></span></div>
-    <div class="opt right" id="o2"><span>7</span><span id="o2m"></span></div>
-    <div class="opt" id="o3"><span>17</span><span></span></div>
-    <div class="opt" id="o4"><span>−7</span><span></span></div>
-  </div>
-  <div class="cta-btn" id="btn">Get Maths Quest free</div>
-  <div class="abs handle center">link in bio</div>
-</div>
-
 <script>
-const DURATION = 24;
-const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
-const prog = (t, a, b) => clamp((t - a) / (b - a));
-const outCubic = x => 1 - Math.pow(1 - x, 3);
-const outBack = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
-const $ = id => document.getElementById(id);
-const fade = (t, a, b, inDur = 0.35, outDur = 0.35) => Math.min(prog(t, a, a + inDur), 1 - prog(t, b - outDur, b));
+const K = Kit, { prog, smooth, outBack, outCubic, lerp, C } = K;
 
-// ---------- scene 1 build ----------
-const hookWords = ["Why", "does", "negative", "×", "negative", "make", "a", '<span class="gold">positive?</span>'];
-$("hook").innerHTML = hookWords.map(w => `<span class="w">${w}</span>`).join("");
-const hookEls = [...document.querySelectorAll("#hook .w")];
+// shots live at different heights; the camera whips between them
+const Y2 = -14, Y3 = -28, Y4 = -42;
 
-// ---------- scene 2 build ----------
-const ROWS = [
-  { a: "3", r: "−6", v: -6 }, { a: "2", r: "−4", v: -4 }, { a: "1", r: "−2", v: -2 },
-  { a: "0", r: "0", v: 0 }, { a: "−1", r: "2", v: 2, key: true }, { a: "−2", r: "4", v: 4, key: true },
-];
-const ROW_T = [3.2, 4.0, 4.8, 5.6, 6.4, 8.6]; // when each row lands
-$("rows").innerHTML = ROWS.map((r, i) => `
-  <div class="row" id="row${i}">
-    <span>${r.a.padStart(2, " ").replace(" ", "&nbsp;")} <span class="eq">×</span> <span style="color:var(--neg)">−2</span> <span class="eq">=</span></span>
-    <span class="ans" id="ans${i}"></span>
-  </div>`).join("");
-// "+2" step labels between rows
-const rowsEl = $("rows");
-for (let i = 0; i < 5; i++) {
-  const s = document.createElement("div");
-  s.className = "step"; s.id = "step" + i; s.style.top = (128 * i + 100) + "px"; s.style.right = "-90px";
-  s.textContent = "+2"; rowsEl.appendChild(s);
-}
-// number line
-const NL_X = v => 480 + v * 66;
-let nl = `<line x1="40" y1="120" x2="920" y2="120" stroke="#2a3043" stroke-width="6" stroke-linecap="round"/>`;
-for (let v = -6; v <= 6; v++) {
-  nl += `<line x1="${NL_X(v)}" y1="100" x2="${NL_X(v)}" y2="140" stroke="#2a3043" stroke-width="5"/>`;
-  if (v % 2 === 0) nl += `<text x="${NL_X(v)}" y="200" fill="${v === 0 ? '#f5f6fa' : '#8a90a6'}" font-family="JetBrains Mono" font-weight="700" font-size="38" text-anchor="middle">${v < 0 ? "−" + -v : v}</text>`;
-}
-nl += `<circle id="dot" cx="0" cy="120" r="24" fill="#ffd23f"/>`;
-$("nl").innerHTML = nl;
+const S = K.stage({
+  duration: 24,
+  captions: [
+    [0.0, 1.5, `Why does a <span class="neg">negative</span> × <span class="neg">negative</span>`],
+    [1.5, 3.0, `make a <span class="pos">positive?</span>`],
+    [3.0, 3.6, `Watch the <span class="gold">pattern.</span>`],
+    [3.6, 4.4, `3 × <span class="neg">−2</span> = <span class="neg">−6</span>`],
+    [4.4, 5.2, `2 × <span class="neg">−2</span> = <span class="neg">−4</span>`],
+    [5.2, 6.0, `1 × <span class="neg">−2</span> = <span class="neg">−2</span>`],
+    [6.0, 6.8, `0 × <span class="neg">−2</span> = 0`],
+    [6.8, 7.8, `−1 × <span class="neg">−2</span> = <span class="gold">?</span>`],
+    [7.8, 8.8, `−1 × <span class="neg">−2</span> = <span class="pos">2</span>`],
+    [8.8, 9.8, `−2 × <span class="neg">−2</span> = <span class="pos">4</span>`],
+    [9.8, 11.2, `Every step is <span class="pos">+2.</span> It doesn't <span class="gold">stop at zero.</span>`],
+    [11.2, 12.6, `<span class="neg">−</span> × <span class="neg">−</span> = <span class="pos">+</span>`],
+    [12.6, 14.1, `Think of <span class="neg">× −1</span> as a <span class="gold">turn.</span>`],
+    [14.1, 15.7, `× −1 → facing <span class="neg">backwards.</span>`],
+    [15.7, 17.2, `× −1 again → <span class="pos">forwards.</span>`],
+    [17.2, 18.4, `Two negatives make a <span class="pos">positive.</span>`],
+    [18.6, 20.3, `8,000+ real <span class="gold">GCSE &amp; A-level</span> exam questions.`, 1500],
+    [20.3, 22.0, `Every answer <span class="gold">explained.</span>`, 1500],
+    [22.0, 24.01, `Maths <span class="gold">Quest</span>`, 1440],
+  ],
+});
+const { scene } = S;
 
-// ---------- scene 3 build ----------
-// Two arrows on a line: walking right; ×(−1) flips it left; ×(−1) again flips it right.
-$("arrows").innerHTML = `
-  <line x1="90" y1="210" x2="990" y2="210" stroke="#2a3043" stroke-width="6"/>
-  <circle cx="540" cy="210" r="12" fill="#f5f6fa"/>
-  <g id="arrowG" transform="translate(540 210)">
-    <line id="arrowLine" x1="0" y1="0" x2="300" y2="0" stroke="#3ee08f" stroke-width="22" stroke-linecap="round"/>
-    <polygon id="arrowHead" points="300,-44 380,0 300,44" fill="#3ee08f"/>
-  </g>
-  <text id="arrowLabel" x="540" y="90" fill="#f5f6fa" font-family="Inter Display" font-weight="800" font-size="56" text-anchor="middle"></text>`;
+// ---------- shot 1: two minus bars become a plus ----------
+const hook = new THREE.Group(); scene.add(hook);
+const barMat = [K.mats.glossy(C.neg), K.mats.glossy(C.neg)];
+const barL = new THREE.Mesh(K.roundedBox(2.2, 0.5, 0.5, 0.2), barMat[0]);
+const barR = new THREE.Mesh(K.roundedBox(2.2, 0.5, 0.5, 0.2), barMat[1]);
+const times = new THREE.Group();
+[1, -1].forEach(s => { const m = new THREE.Mesh(K.roundedBox(0.9, 0.16, 0.16, 0.07), K.mats.gold()); m.rotation.z = s * Math.PI / 4; times.add(m); });
+hook.add(barL, barR, times);
+const negCol = new THREE.Color(C.neg), posCol = new THREE.Color(C.pos);
 
-function setText(id, html) { const el = $(id); if (el._h !== html) { el.innerHTML = html; el._h = html; } }
-
-function render(t) {
-  $("progress").style.width = (clamp(t / DURATION) * 1080) + "px";
-  $("glow").style.transform = `translate(${Math.sin(t * 0.6) * 60}px, ${Math.cos(t * 0.5) * 80}px)`;
-
-  // ----- SCENE 1 (0 – 3.0) -----
-  const s1 = fade(t, -1, 3.0, 0.01, 0.3);
-  $("s1").style.opacity = s1;
-  hookEls.forEach((el, i) => {
-    const p = prog(t, 0.05 + i * 0.13, 0.35 + i * 0.13);
-    el.style.opacity = p;
-    el.style.transform = `translateY(${(1 - outBack(p)) * 60}px) scale(${0.85 + 0.15 * outBack(p)})`;
-  });
-  const lastW = hookEls[hookEls.length - 1];
-  const pulse = prog(t, 1.4, 1.8);
-  lastW.style.transform += ` scale(${1 + Math.sin(pulse * Math.PI) * 0.12})`;
-  $("hooksub").style.opacity = prog(t, 1.6, 2.0);
-
-  // ----- SCENE 2 (3.0 – 13.4) -----
-  $("s2").style.opacity = fade(t, 3.0, 13.4, 0.3, 0.4);
-  ROWS.forEach((r, i) => {
-    const row = $("row" + i), land = ROW_T[i];
-    const p = prog(t, land - 0.4, land);
-    row.style.opacity = p;
-    row.style.transform = `translateX(${(1 - outCubic(p)) * -80}px)`;
-    let ans = "";
-    if (r.key) {
-      // key rows show "?" first so the viewer guesses, then reveal
-      const reveal = i === 4 ? 7.0 : 9.6;
-      if (t >= land - 0.4 && t < reveal) ans = `<span class="gold">?</span>`;
-      if (t >= reveal) {
-        const q = prog(t, reveal, reveal + 0.35);
-        ans = `<span style="color:var(--pos);display:inline-block;transform:scale(${0.6 + 0.4 * outBack(q) + Math.sin(prog(t, reveal, reveal + 0.5) * Math.PI) * 0.15})">${r.r}</span>`;
-      }
-    } else if (t >= land - 0.1) {
-      ans = `<span style="color:${r.v < 0 ? 'var(--neg)' : 'var(--ink)'}">${r.r}</span>`;
-    }
-    setText("ans" + i, ans);
-  });
-  [4.4, 5.2, 6.0, 7.2, 9.8].forEach((st, i) => {
-    const p = prog(t, st, st + 0.3);
-    $("step" + i).style.opacity = p;
-    $("step" + i).style.transform = `translateX(${(1 - outCubic(p)) * 30}px)`;
-  });
-  let cap = "";
-  if (t >= 3.4 && t < 6.4) cap = `Each step goes up by <span style="color:var(--pos)">2</span>…`;
-  else if (t >= 6.4 && t < 7.0) cap = `So what comes <span class="gold">next?</span>`;
-  else if (t >= 7.0 && t < 9.6) cap = `The pattern doesn't stop at zero.`;
-  else if (t >= 9.6) cap = `<span style="color:var(--neg)">−</span> × <span style="color:var(--neg)">−</span> = <span style="color:var(--pos)">+</span><br><span style="color:var(--dim);font-size:48px">It's the only answer that keeps maths consistent.</span>`;
-  setText("cap2", cap);
-  $("cap2").style.opacity = cap ? 1 : 0;
-  // dot hops along the number line following the latest answer
-  const stops = [[3.2, -6], [4.0, -4], [4.8, -2], [5.6, 0], [7.0, 2], [9.6, 4]];
-  let x = NL_X(-6), y = 120;
-  for (let k = 0; k < stops.length; k++) {
-    const [st, v] = stops[k];
-    if (t >= st - 0.35) {
-      const p = outCubic(prog(t, st - 0.35, st));
-      const prev = k ? NL_X(stops[k - 1][1]) : NL_X(-6);
-      x = prev + (NL_X(v) - prev) * p;
-      y = 120 - Math.sin(p * Math.PI) * (k ? 70 : 0);
+// ---------- number line builder (shots 2 and 3) ----------
+function numberLine(y, from, to) {
+  const g = new THREE.Group(); g.position.y = y;
+  const len = to - from + 1.2;
+  const bar = new THREE.Mesh(K.roundedBox(len, 0.22, 0.6, 0.08), K.mats.navy());
+  bar.position.x = (from + to) / 2; g.add(bar);
+  const edge = new THREE.Mesh(new THREE.BoxGeometry(len - 0.1, 0.05, 0.05), K.mats.gold());
+  edge.position.set((from + to) / 2, 0.11, 0.3); g.add(edge);
+  for (let v = from; v <= to; v++) {
+    const tick = new THREE.Mesh(new THREE.BoxGeometry(0.06, v % 2 ? 0.22 : 0.4, 0.06), K.mats.gold());
+    tick.position.set(v, 0.2, 0.15); g.add(tick);
+    if (v % 2 === 0) {
+      const lab = K.plane(0.9, 0.6, 180, 120, (c, w, h) => {
+        c.font = '800 84px "JetBrains Mono"'; c.textAlign = "center"; c.fillStyle = v === 0 ? "#f5f6fa" : "#9aa0b6";
+        c.fillText(v < 0 ? "−" + -v : String(v), w / 2, 92);
+      });
+      lab.position.set(v, -0.55, 0.32); g.add(lab);
     }
   }
-  $("dot").setAttribute("cx", x); $("dot").setAttribute("cy", y);
-  $("nl").style.opacity = prog(t, 3.0, 3.4);
-
-  // ----- SCENE 3 (13.4 – 18.6) -----
-  $("s3").style.opacity = fade(t, 13.4, 18.6, 0.3, 0.4);
-  $("flipText").style.transform = `translateY(${(1 - outCubic(prog(t, 13.4, 13.8))) * 40}px)`;
-  // arrow: points right (+3), flip at 14.8 (→ −3), flip again at 16.4 (→ +3)
-  const f1 = outCubic(prog(t, 14.6, 15.1)), f2 = outCubic(prog(t, 16.2, 16.7));
-  const dir = 1 - 2 * f1 + 2 * f2; // 1 → −1 → 1
-  $("arrowG").setAttribute("transform", `translate(540 210) scale(${dir} 1)`);
-  const col = dir < 0 ? "#ff5c7a" : "#3ee08f";
-  $("arrowLine").setAttribute("stroke", col); $("arrowHead").setAttribute("fill", col);
-  let lab = "+3", cap3 = "Start facing forwards.";
-  if (t >= 14.8) { lab = "× (−1)  →  −3"; cap3 = `Multiply by a negative:<br><span style="color:var(--neg)">turn around.</span>`; }
-  if (t >= 16.4) { lab = "× (−1)  →  +3"; cap3 = `Do it again… you're facing<br><span style="color:var(--pos)">forwards again.</span>`; }
-  setText("arrowLabel", lab); setText("cap3", cap3);
-
-  // ----- SCENE 4 (18.6 – 24) -----
-  const s4 = prog(t, 18.6, 19.0);
-  $("s4").style.opacity = s4;
-  $("s4").style.transform = `scale(${0.96 + 0.04 * outCubic(s4)})`;
-  const ph = outBack(prog(t, 18.9, 19.5));
-  $("phone").style.transform = `translateY(${(1 - ph) * 200}px) rotate(${(1 - ph) * -4}deg)`;
-  $("phone").style.opacity = prog(t, 18.9, 19.2);
-  // tap wrong then right
-  const wrongOn = t >= 20.2, rightOn = t >= 21.0;
-  $("o1").className = "opt" + (wrongOn ? " wrong" : "");
-  setText("o1m", wrongOn ? "✗" : "");
-  $("o2").className = "opt" + (rightOn ? " right" : "");
-  setText("o2m", rightOn ? "✓" : "");
-  const xp = prog(t, 21.1, 21.5);
-  $("xp").style.opacity = xp;
-  $("xp").style.transform = `translateY(${(1 - outBack(xp)) * 30}px)`;
-  const b = prog(t, 21.6, 22.0);
-  $("btn").style.opacity = b;
-  $("btn").style.transform = `scale(${0.8 + 0.2 * outBack(b) + Math.sin(Math.max(0, t - 22) * 4) * 0.025 * (t > 22)})`;
+  scene.add(g); return g;
 }
-window.DURATION = DURATION;
-window.seek = t => render(t);
-// live preview when opened in a browser
-if (!navigator.webdriver) {
-  const t0 = performance.now();
-  (function loop() { render(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); })();
-} else render(0);
+
+// ---------- shot 2: the pattern ----------
+numberLine(Y2, -7, 7);
+const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.12, 48), K.mats.gold());
+coin.rotation.x = Math.PI / 2; scene.add(coin);
+const coinFace = K.plane(0.6, 0.6, 128, 128, (c) => { c.font = '900 92px "Inter Display"'; c.textAlign = "center"; c.fillStyle = "#6b4c10"; c.fillText("×", 64, 96); });
+coinFace.position.z = 0.08; coinFace.rotation.x = -Math.PI / 2; coin.add(coinFace);
+const STOPS = [[3.6, -6], [4.4, -4], [5.2, -2], [6.0, 0], [7.8, 2], [8.8, 4]];
+const HOP = 0.45;
+const trail = STOPS.map(([, v]) => {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(0.11, 24, 16), K.mats.glossy(v < 0 ? C.neg : v > 0 ? C.pos : C.ink));
+  m.position.set(v, Y2 + 0.45, 0.2); scene.add(m); return m;
+});
+const plus2 = STOPS.slice(1).map(([, v]) => {
+  const p = K.plane(0.6, 0.34, 160, 90, (c) => { c.font = '800 70px Inter'; c.textAlign = "center"; c.fillStyle = "#4ff0a0"; c.fillText("+2", 80, 72); });
+  p.position.set(v - 1, Y2 + 1.75, 0.2); scene.add(p); return p;
+});
+const qMark = K.plane(0.9, 1.2, 180, 240, (c) => { c.font = '900 220px "Inter Display"'; c.textAlign = "center"; c.fillStyle = "#ffd23f"; c.fillText("?", 90, 200); });
+qMark.position.set(2, Y2 + 1.0, 0.2); scene.add(qMark);
+function coinPos(t) {
+  if (t < STOPS[0][0]) { const p = outCubic(prog(t, 3.15, 3.6)); return [-6, Y2 + 0.75 + (1 - p) * 4, 0.2, 0]; }
+  let x = -6, y = Y2 + 0.75, spin = 0;
+  for (let k = 1; k < STOPS.length; k++) {
+    const [at, v] = STOPS[k], a = at - HOP;
+    if (t >= a) {
+      const p = smooth(prog(t, a, at));
+      x = lerp(STOPS[k - 1][1], v, p); y = Y2 + 0.75 + Math.sin(p * Math.PI) * 1.2; spin = p * Math.PI * 2;
+    }
+  }
+  return [x, y, 0.2, spin];
+}
+S.ring(6.9, 7.75, () => [2, Y2 + 1.0, 0.2], 130);
+
+// ---------- shot 3: the turning arrow ----------
+numberLine(Y3, -4, 4);
+const arrow = new THREE.Group(); arrow.position.set(0, Y3 + 0.95, 0.15); scene.add(arrow);
+const arrowMat = K.mats.gold();
+const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.3, 32), arrowMat);
+shaft.rotation.z = Math.PI / 2; shaft.position.x = 1.15;
+const head = new THREE.Mesh(new THREE.ConeGeometry(0.34, 0.75, 40), arrowMat);
+head.rotation.z = -Math.PI / 2; head.position.x = 2.65;
+const hub = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 16), arrowMat);
+arrow.add(shaft, head, hub);
+const arc = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.035, 12, 96, Math.PI), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0 }));
+arc.rotation.x = Math.PI / 2; arc.position.set(0, Y3 + 0.95, 0.15); scene.add(arc);
+const goldCol = new THREE.Color(C.gold);
+
+// ---------- shot 4: the app ----------
+const quiz = K.quiz({
+  pills: ["GCSE", "Edexcel", "2 marks"],
+  question: ["Work out (−3) × (−4) − 5"],
+  options: [{ text: "−17" }, { text: "7" }, { text: "17" }, { text: "−7" }],
+});
+const ph = K.phone(quiz.draw); ph.scale.setScalar(0.78); scene.add(ph);
+S.ring(20.3, 21.0, () => K.screenPoint(ph, ...quiz.markPoint(0)), 75);
+S.ring(21.0, 21.9, () => K.screenPoint(ph, ...quiz.markPoint(1)), 75);
+const btn = K.el("div", "btn", S.ov, "Get Maths Quest free"); btn.style.top = "1620px";
+const bio = K.el("div", "cap dim", S.ov, "link in bio"); bio.style.cssText += "top:1790px;font-size:36px;font-weight:600";
+
+const CAM = [
+  { t: 0, pos: [0, 0.4, 15], look: [0, 0, 0] },
+  { t: 2.9, pos: [1.0, 0.3, 11.5], look: [0, 0, 0] },
+  { t: 3.4, pos: [-4.5, Y2 + 1.8, 11], look: [-4.5, Y2 + 0.5, 0], dur: 0.5 },
+  { t: 6.4, pos: [-1, Y2 + 1.8, 11.5], look: [-1, Y2 + 0.5, 0] },
+  { t: 7.0, pos: [1.8, Y2 + 1.3, 7.5], look: [1.8, Y2 + 0.8, 0], dur: 0.6 },
+  { t: 9.6, pos: [2.6, Y2 + 1.6, 9.5], look: [2.6, Y2 + 0.6, 0] },
+  { t: 10.8, pos: [-12, Y2 + 5, 17], look: [0.5, Y2, 0], dur: 1.2 },
+  { t: 13.1, pos: [5, Y3 + 3, 14], look: [0.6, Y3 + 0.7, 0], dur: 0.5 },
+  { t: 18.4, pos: [-4.5, Y3 + 2.6, 14], look: [0.4, Y3 + 0.7, 0] },
+  { t: 19.1, pos: [0, Y4 + 0.6, 16], look: [0, Y4 + 0.9, 0], dur: 0.6 },
+  { t: 24, pos: [0, Y4 + 0.6, 14.5], look: [0, Y4 + 0.9, 0] },
+];
+
+S.onFrame(t => {
+  S.camPath(t, CAM);
+
+  // shot 1
+  const merge = smooth(prog(t, 1.7, 2.35));
+  const spin = t * 0.5;
+  barL.position.set(lerp(-1.35, 0, merge), Math.sin(t * 2) * 0.08, 0);
+  barR.position.set(lerp(1.35, 0, merge), Math.sin(t * 2 + 1) * 0.08, 0);
+  barL.rotation.set(0, Math.sin(spin) * 0.35, 0);
+  barR.rotation.set(0, Math.sin(spin) * 0.35, outBack(prog(t, 2.0, 2.5)) * Math.PI / 2);
+  times.scale.setScalar(Math.max(0.001, 1 - outCubic(prog(t, 1.6, 2.0))));
+  times.rotation.z = t * 1.2;
+  barMat.forEach(m => { m.color.copy(negCol).lerp(posCol, prog(t, 2.1, 2.5)); m.emissive.copy(m.color); });
+  const pulse = Math.sin(prog(t, 2.35, 2.8) * Math.PI) * 0.25;
+  hook.scale.setScalar(1 + pulse);
+  hook.rotation.y = merge * Math.sin(t * 0.8) * 0.4;
+
+  // shot 2
+  const [cx, cy, cz, cs] = coinPos(t);
+  coin.position.set(cx, cy, cz); coin.rotation.set(Math.PI / 2, 0, 0); coin.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), cs + 0.7 + Math.sin(t * 1.5) * 0.3);
+  trail.forEach((m, i) => m.scale.setScalar(Math.max(0.001, outBack(prog(t, STOPS[i][0], STOPS[i][0] + 0.3)))));
+  plus2.forEach((p, i) => { const a = STOPS[i + 1][0] - HOP * 0.6; p.material.opacity = prog(t, a, a + 0.25); p.position.y = Y2 + 1.75 + (1 - outCubic(prog(t, a, a + 0.35))) * -0.4; });
+  qMark.material.opacity = Math.min(prog(t, 6.8, 7.0), 1 - prog(t, 7.5, 7.7));
+  qMark.scale.setScalar(1 + Math.sin(t * 8) * 0.06);
+
+  // shot 3
+  const f1 = outBack(prog(t, 14.2, 15.0)), f2 = outBack(prog(t, 15.8, 16.6));
+  arrow.rotation.y = (f1 + f2) * Math.PI;
+  // gold → red when it turns backwards → green when it turns forwards again
+  if (t < 16.0) arrowMat.color.copy(goldCol).lerp(negCol, prog(t, 14.4, 14.9));
+  else arrowMat.color.copy(negCol).lerp(posCol, prog(t, 16.0, 16.5));
+  arrowMat.metalness = 0.9 - 0.5 * prog(t, 14.4, 14.9);
+  arc.material.opacity = Math.max(Math.sin(prog(t, 14.2, 15.2) * Math.PI), Math.sin(prog(t, 15.8, 16.8) * Math.PI)) * 0.9;
+  arc.rotation.z = t > 15.5 ? Math.PI : 0;
+  arrow.position.y = Y3 + 0.95 + Math.sin(t * 2) * 0.04;
+
+  // shot 4
+  const fly = outCubic(prog(t, 18.5, 19.4));
+  ph.position.set(0, Y4 - (1 - fly) * 7 + Math.sin(t * 1.4) * 0.08, (1 - fly) * -3);
+  ph.rotation.set((1 - fly) * 0.6, lerp(1.4, -0.22, fly) + prog(t, 19.4, 24) * 0.34, (1 - fly) * 0.25);
+  ph.screen.tex.redraw((c, w, h) => quiz.draw(c, w, h, { wrong: t >= 20.4 ? 0 : -1, right: t >= 21.1 ? 1 : -1, xp: t >= 21.2 }),
+    `${t >= 20.4}${t >= 21.1}${t >= 21.2}`);
+  const b = prog(t, 22.0, 22.4);
+  btn.style.opacity = b; bio.style.opacity = b;
+  btn.style.transform = `scale(${0.8 + 0.2 * outBack(b) + (t > 22.4 ? Math.sin((t - 22.4) * 4) * 0.025 : 0)})`;
+});
+document.fonts.ready.then(() => S.start());
 </script>
 </body>
 </html>
