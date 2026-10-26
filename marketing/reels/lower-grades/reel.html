@@ -11,7 +11,7 @@
 const K = Kit, { prog, smooth, outBack, outCubic, lerp, C } = K;
 
 const Y3 = -14, Y4 = -28, Y5 = -42;
-const INK = "#2747a8", RED = "#e0284f", GREEN = "#12a35c";
+const INK = C.css.navy, RED = C.css.red, GREEN = C.css.green;
 const HAND = 'italic 600 64px Caladea';
 
 const S = K.stage({
@@ -58,17 +58,17 @@ function ringMark(c, x, y, r, color, text, font) {
 // ---------- shots 1–2: the exam paper ----------
 const PW = 1020, PH = 1440, PAPER_W = 3.4, PAPER_H = 4.8;
 const paper = new THREE.Group(); paper.scale.setScalar(0.72); scene.add(paper);
-paper.add(new THREE.Mesh(new THREE.BoxGeometry(PAPER_W, PAPER_H, 0.03), K.mats.paper()));
+paper.add(K.outline(new THREE.Mesh(K.roundedBox(PAPER_W, PAPER_H, 0.03, 0.012), K.mats.cream()), 0.03));
 const cover = K.plane(PAPER_W, PAPER_H, PW, PH, (c, w, h) => {
-  c.fillStyle = "#f3f4f8"; c.fillRect(0, 0, w, h);
-  c.fillStyle = "#1b2238"; c.fillRect(0, 0, w, 150);
-  c.fillStyle = "#fff"; c.font = '800 54px Inter'; c.fillText("GCSE Mathematics", 70, 98);
-  c.fillStyle = "#1b2238"; c.font = '800 72px "Inter Display"'; c.fillText("Paper 1", 70, 300);
-  c.font = '500 40px Inter'; c.fillStyle = "#6b7189"; c.fillText("Non-calculator · 1 hour 30 minutes", 70, 360);
-  c.strokeStyle = "#c5c9d6"; c.lineWidth = 3;
-  ["Candidate name", "Centre number", "Candidate number"].forEach((l, i) => { c.fillStyle = "#6b7189"; c.font = '500 34px Inter'; c.fillText(l, 70, 480 + i * 110); c.strokeRect(430, 438 + i * 110, 520, 64); });
-  c.fillStyle = "#dfe2ea"; for (let i = 0; i < 9; i++) c.fillRect(70, 820 + i * 50, i % 3 === 2 ? 520 : 860, 20);
-  c.font = '500 36px Inter'; c.fillStyle = "#6b7189"; c.fillText("Target grade", 600, 1250);
+  c.fillStyle = C.css.cream; c.fillRect(0, 0, w, h);
+  c.fillStyle = C.css.navy; c.fillRect(0, 0, w, 150);
+  c.fillStyle = "#fff"; c.font = '800 54px Bricolage'; c.fillText("GCSE Mathematics", 70, 98);
+  c.fillStyle = C.css.ink; c.font = '800 72px Bricolage'; c.fillText("Paper 1", 70, 300);
+  c.font = '500 40px Bricolage'; c.fillStyle = "#5e5a50"; c.fillText("Non-calculator · 1 hour 30 minutes", 70, 360);
+  c.strokeStyle = "#d6d1c2"; c.lineWidth = 3;
+  ["Candidate name", "Centre number", "Candidate number"].forEach((l, i) => { c.fillStyle = "#5e5a50"; c.font = '500 34px Bricolage'; c.fillText(l, 70, 480 + i * 110); c.strokeRect(430, 438 + i * 110, 520, 64); });
+  c.fillStyle = "#dedacd"; for (let i = 0; i < 9; i++) c.fillRect(70, 820 + i * 50, i % 3 === 2 ? 520 : 860, 20);
+  c.font = '500 36px Bricolage'; c.fillStyle = "#5e5a50"; c.fillText("Target grade", 600, 1250);
   ringMark(c, 820, 1330, 70, RED, "4", 'italic 800 130px Caladea');
   c.fillStyle = RED; c.font = 'italic 600 54px Caladea'; c.fillText("Grade", 560, 1355);
   c.fillStyle = INK; c.font = 'italic 700 64px Caladea'; c.fillText("6", 870, 1252);
@@ -83,19 +83,19 @@ const LINES = [
   { y: 860, text: "y + 5 = x(3 − y)", at: 7.8, mark: 8.2 },
 ];
 function drawQuestion(c, w, h, t) {
-  c.fillStyle = "#f3f4f8"; c.fillRect(0, 0, w, h);
-  c.fillStyle = "#6b7189"; c.font = '500 32px Inter'; c.fillText("Edexcel A-level · Specimen Paper 1", 70, 90);
-  c.fillStyle = "#1b2238"; c.font = '800 46px Inter'; c.fillText("Question 10", 70, 160);
-  c.font = '600 58px Inter'; c.fillText("f(x) =", 70, 290); K.frac(c, "3x − 5", "x + 1", 265, 275, 62);
-  c.fillText("Find f⁻¹(x).", 70, 410); c.fillStyle = "#6b7189"; c.fillText("(3)", 640, 410);
-  c.fillStyle = "#c5c9d6"; c.fillRect(70, 470, 880, 4); c.fillRect(780, 500, 3, 640);
+  c.fillStyle = C.css.cream; c.fillRect(0, 0, w, h);
+  c.fillStyle = "#5e5a50"; c.font = '500 32px Bricolage'; c.fillText("Edexcel A-level · Specimen Paper 1", 70, 90);
+  c.fillStyle = C.css.ink; c.font = '800 46px Bricolage'; c.fillText("Question 10", 70, 160);
+  c.font = '600 58px Bricolage'; c.fillText("f(x) =", 70, 290); K.frac(c, "3x − 5", "x + 1", 265, 275, 62);
+  c.fillText("Find f⁻¹(x).", 70, 410); c.fillStyle = "#5e5a50"; c.fillText("(3)", 640, 410);
+  c.fillStyle = "#d6d1c2"; c.fillRect(70, 470, 880, 4); c.fillRect(780, 500, 3, 640);
   LINES.forEach(L => {
     writeOn(c, L.text, 90, L.y, prog(t, L.at, L.at + 0.55));
-    if (L.mark && t >= L.mark) { c.fillStyle = GREEN; c.font = '800 46px Inter'; c.fillText("M1 ✓", 810, L.y); }
+    if (L.mark && t >= L.mark) { c.fillStyle = GREEN; c.font = '800 46px Bricolage'; c.fillText("M1 ✓", 810, L.y); }
   });
   // the final (wrong) answer is always there
   c.save(); c.font = HAND; c.fillStyle = INK; c.fillText("f⁻¹(x) =", 90, 1010); K.frac(c, "x + 5", "x − 3", 350, 990, 64); c.restore();
-  if (t >= 4.6) { c.fillStyle = RED; c.font = '800 46px Inter'; c.fillText("A1 ✗", 810, 1010); }
+  if (t >= 4.6) { c.fillStyle = RED; c.font = '800 46px Bricolage'; c.fillText("A1 ✗", 810, 1010); }
   if (t >= 4.9 && t < 8.6) ringMark(c, 880, 230, 72, RED, "0/3", 'italic 800 64px Caladea');
   if (t >= 8.6) ringMark(c, 880, 230, 72, GREEN, "2/3", 'italic 800 64px Caladea');
 }
@@ -109,36 +109,36 @@ S.ring(8.7, 10.4, bp(880, 230), 120);
 
 // ---------- shot 3: re-reading vs testing ----------
 const book = new THREE.Group(); book.position.set(-1.9, Y3, 0); scene.add(book);
-const coverMat = new THREE.MeshStandardMaterial({ color: 0x3a4f9a, metalness: 0.2, roughness: 0.5 });
+const coverMat = K.mats.navy();
 const notes = (c, w, h) => {
   c.fillStyle = "#f7f3e8"; c.fillRect(0, 0, w, h);
-  c.fillStyle = "#c9c2ae"; for (let i = 0; i < 14; i++) c.fillRect(40, 70 + i * 52, i % 4 === 3 ? 200 : 360, 12);
+  c.fillStyle = "#cdc6b2"; for (let i = 0; i < 14; i++) c.fillRect(40, 70 + i * 52, i % 4 === 3 ? 200 : 360, 12);
   c.fillStyle = "rgba(255,230,0,.55)"; [1, 2, 5, 9, 10].forEach(i => c.fillRect(30, 56 + i * 52, 380, 34));
 };
 function bookHalf(side) {
   const g = new THREE.Group();
   const cv = new THREE.Mesh(K.roundedBox(1.7, 2.3, 0.08, 0.03), coverMat); cv.position.set(side * 0.85, 0, -0.08);
-  const pg = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.2, 0.1), K.mats.paper()); pg.position.set(side * 0.82, 0, 0);
+  const pg = K.outline(new THREE.Mesh(K.roundedBox(1.6, 2.2, 0.1, 0.02), K.mats.cream()), 0.025); pg.position.set(side * 0.82, 0, 0);
   const face = K.plane(1.56, 2.16, 440, 800, notes, { lit: true }); face.position.set(side * 0.82, 0, 0.051);
   g.add(cv, pg, face); return g;
 }
 const bookL = bookHalf(-1), bookR = bookHalf(1); book.add(bookL, bookR);
-const greyCol = new THREE.Color(0x3b3f4c), blueCol = new THREE.Color(0x3a4f9a);
+const greyCol = new THREE.Color(0x9a958a), blueCol = new THREE.Color(C.navy);
 
 const stack = new THREE.Group(); stack.position.set(1.9, Y3, 0); scene.add(stack);
 const sheets = [0, 1, 2, 3].map(i => {
   const g = new THREE.Group();
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.7, 2.3, 0.02), K.mats.paper()));
+  g.add(K.outline(new THREE.Mesh(K.roundedBox(1.7, 2.3, 0.02, 0.008), K.mats.cream()), 0.025));
   const f = K.plane(1.7, 2.3, 340, 460, (c, w, h) => {
-    c.fillStyle = "#f3f4f8"; c.fillRect(0, 0, w, h);
-    c.fillStyle = "#1b2238"; c.font = '800 30px Inter'; c.fillText(`Q${i + 3}`, 26, 50);
-    c.fillStyle = "#c5c9d6"; for (let k = 0; k < 6; k++) c.fillRect(26, 80 + k * 30, k % 3 === 2 ? 160 : 280, 10);
-    c.fillStyle = "#2747a8"; c.font = 'italic 600 34px Caladea'; c.fillText(["x = 7", "y = 2x − 3", "48 cm²", "x = −2, 5"][i], 30, 330);
-    c.fillStyle = "#12a35c"; c.font = '900 64px Inter'; c.fillText("✓", 255, 420);
+    c.fillStyle = C.css.cream; c.fillRect(0, 0, w, h);
+    c.fillStyle = C.css.ink; c.font = '800 30px Bricolage'; c.fillText(`Q${i + 3}`, 26, 50);
+    c.fillStyle = "#d6d1c2"; for (let k = 0; k < 6; k++) c.fillRect(26, 80 + k * 30, k % 3 === 2 ? 160 : 280, 10);
+    c.fillStyle = C.css.navy; c.font = 'italic 600 34px Caladea'; c.fillText(["x = 7", "y = 2x − 3", "48 cm²", "x = −2, 5"][i], 30, 330);
+    c.fillStyle = C.css.green; c.font = '800 64px Bricolage'; c.fillText("✓", 255, 420);
   }, { lit: true });
   f.position.z = 0.011; g.add(f); stack.add(g); return g;
 });
-const sheetGlow = new THREE.Mesh(K.roundedBox(1.9, 2.5, 0.01, 0.005), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0 }));
+const sheetGlow = new THREE.Mesh(K.roundedBox(1.9, 2.5, 0.01, 0.005), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 }));
 sheetGlow.position.z = -0.1; stack.add(sheetGlow);
 
 // ---------- shot 4: repeated mistakes ----------
@@ -149,12 +149,12 @@ const MISTAKES = [
 ];
 const cards = MISTAKES.map((m, i) => {
   const g = new THREE.Group();
-  const edge = new THREE.Mesh(K.roundedBox(3.3, 1.12, 0.1, 0.05), new THREE.MeshStandardMaterial({ color: C.neg, emissive: C.neg, emissiveIntensity: 0.5, roughness: 0.4 }));
-  const body = new THREE.Mesh(K.roundedBox(3.24, 1.06, 0.16, 0.05), new THREE.MeshStandardMaterial({ color: 0x10141f, metalness: 0.3, roughness: 0.5 }));
+  const edge = K.outline(new THREE.Mesh(K.roundedBox(3.36, 1.18, 0.1, 0.07), K.mats.red()), 0.03);
+  const body = new THREE.Mesh(K.roundedBox(3.2, 1.02, 0.16, 0.05), K.mats.cream());
   const f = K.plane(3.1, 0.95, 930, 285, (c, w, h) => {
-    c.fillStyle = "#f5f6fa"; c.font = '700 58px "JetBrains Mono"';
+    c.fillStyle = C.css.ink; c.font = '400 62px Caladea';
     if (m.f) K.frac(c, m.f[0], m.f[1], 40, 150, 72); else c.fillText(m.t, 40, 170);
-    c.textAlign = "right"; c.fillStyle = "#ff6b86"; c.font = '800 52px Inter'; c.fillText(m.tag, w - 40, 165);
+    c.textAlign = "right"; c.fillStyle = C.css.red; c.font = '800 52px Bricolage'; c.fillText(m.tag, w - 40, 165);
   });
   f.position.z = 0.085; g.add(edge, body, f); g.edge = edge; g.face = f;
   scene.add(g); return g;
@@ -228,8 +228,7 @@ S.onFrame(t => {
     g.position.set((i - 1) * 0.15, Y4 + CARD_Y[i] + (1 - outCubic(p)) * 6, (1 - p) * 2);
     g.rotation.set((1 - e) * 1.6 + Math.sin(t * 1.1 + i) * 0.05, Math.sin(t * 0.7 + i) * 0.12, (1 - e) * (i - 1) * 0.8 + (i - 1) * 0.04);
     const fix = prog(t, 20.0 + i * 0.2, 20.4 + i * 0.2);
-    g.edge.material.color.set(C.neg).lerp(new THREE.Color(C.gold), fix);
-    g.edge.material.emissive.copy(g.edge.material.color);
+    g.edge.material.color.set(C.red).lerp(new THREE.Color(C.green), fix);
   });
 
   // phone
@@ -241,7 +240,7 @@ S.onFrame(t => {
   btn.style.opacity = b; bio.style.opacity = b;
   btn.style.transform = `scale(${0.8 + 0.2 * outBack(b) + (t > 26.6 ? Math.sin((t - 26.6) * 4) * 0.025 : 0)})`;
 });
-K.loadBrand("../lib/").then(b => { brand = b; screen = K.mqScript(ph, quiz, b.fiveADay, APP); S.start(); });
+K.loadBrand("../lib/").then(b => { brand = b; S.refreshTextures(); screen = K.mqScript(ph, quiz, b.fiveADay, APP); S.start(); });
 </script>
 </body>
 </html>

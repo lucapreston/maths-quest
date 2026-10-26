@@ -42,28 +42,26 @@ const { scene } = S;
 
 // ---------- shot 1: two minus bars become a plus ----------
 const hook = new THREE.Group(); scene.add(hook);
-const barMat = [K.mats.glossy(C.neg), K.mats.glossy(C.neg)];
-const barL = new THREE.Mesh(K.roundedBox(2.2, 0.5, 0.5, 0.2), barMat[0]);
-const barR = new THREE.Mesh(K.roundedBox(2.2, 0.5, 0.5, 0.2), barMat[1]);
+const barMat = [K.mats.red(), K.mats.red()];
+const barL = K.outline(new THREE.Mesh(K.roundedBox(2.2, 0.5, 0.5, 0.2), barMat[0]), 0.05);
+const barR = K.outline(new THREE.Mesh(K.roundedBox(2.2, 0.5, 0.5, 0.2), barMat[1]), 0.05);
 const times = new THREE.Group();
-[1, -1].forEach(s => { const m = new THREE.Mesh(K.roundedBox(0.9, 0.16, 0.16, 0.07), K.mats.gold()); m.rotation.z = s * Math.PI / 4; times.add(m); });
+[1, -1].forEach(s => { const m = new THREE.Mesh(K.roundedBox(0.9, 0.16, 0.16, 0.07), K.mats.ink()); m.rotation.z = s * Math.PI / 4; times.add(m); });
 hook.add(barL, barR, times);
-const negCol = new THREE.Color(C.neg), posCol = new THREE.Color(C.pos);
+const negCol = new THREE.Color(C.red), posCol = new THREE.Color(C.green);
 
 // ---------- number line builder (shots 2 and 3) ----------
 function numberLine(y, from, to) {
   const g = new THREE.Group(); g.position.y = y;
   const len = to - from + 1.2;
-  const bar = new THREE.Mesh(K.roundedBox(len, 0.22, 0.6, 0.08), K.mats.navy());
+  const bar = K.outline(new THREE.Mesh(K.roundedBox(len, 0.22, 0.6, 0.08), K.mats.cream()), 0.03);
   bar.position.x = (from + to) / 2; g.add(bar);
-  const edge = new THREE.Mesh(new THREE.BoxGeometry(len - 0.1, 0.05, 0.05), K.mats.gold());
-  edge.position.set((from + to) / 2, 0.11, 0.3); g.add(edge);
   for (let v = from; v <= to; v++) {
-    const tick = new THREE.Mesh(new THREE.BoxGeometry(0.06, v % 2 ? 0.22 : 0.4, 0.06), K.mats.gold());
+    const tick = new THREE.Mesh(new THREE.BoxGeometry(0.07, v % 2 ? 0.22 : 0.4, 0.07), K.mats.ink());
     tick.position.set(v, 0.2, 0.15); g.add(tick);
     if (v % 2 === 0) {
       const lab = K.plane(0.9, 0.6, 180, 120, (c, w, h) => {
-        c.font = '800 84px "JetBrains Mono"'; c.textAlign = "center"; c.fillStyle = v === 0 ? "#f5f6fa" : "#9aa0b6";
+        c.font = '800 84px "JetBrains Mono"'; c.textAlign = "center"; c.fillStyle = v === 0 ? C.css.navy : C.css.ink;
         c.fillText(v < 0 ? "−" + -v : String(v), w / 2, 92);
       });
       lab.position.set(v, -0.55, 0.32); g.add(lab);
@@ -74,21 +72,21 @@ function numberLine(y, from, to) {
 
 // ---------- shot 2: the pattern ----------
 numberLine(Y2, -7, 7);
-const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.12, 48), K.mats.gold());
+const coin = K.outline(new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.12, 48), K.mats.red()), 0.03);
 coin.rotation.x = Math.PI / 2; scene.add(coin);
-const coinFace = K.plane(0.6, 0.6, 128, 128, (c) => { c.font = '900 92px "Inter Display"'; c.textAlign = "center"; c.fillStyle = "#6b4c10"; c.fillText("×", 64, 96); });
+const coinFace = K.plane(0.6, 0.6, 128, 128, (c) => { c.font = '800 92px Bricolage'; c.textAlign = "center"; c.fillStyle = "#fff"; c.fillText("×", 64, 96); });
 coinFace.position.z = 0.08; coinFace.rotation.x = -Math.PI / 2; coin.add(coinFace);
 const STOPS = [[3.6, -6], [4.4, -4], [5.2, -2], [6.0, 0], [7.8, 2], [8.8, 4]];
 const HOP = 0.45;
 const trail = STOPS.map(([, v]) => {
-  const m = new THREE.Mesh(new THREE.SphereGeometry(0.11, 24, 16), K.mats.glossy(v < 0 ? C.neg : v > 0 ? C.pos : C.ink));
+  const m = K.outline(new THREE.Mesh(new THREE.SphereGeometry(0.11, 24, 16), K.mats.toon(v < 0 ? C.red : v > 0 ? C.green : C.cream)), 0.025);
   m.position.set(v, Y2 + 0.45, 0.2); scene.add(m); return m;
 });
 const plus2 = STOPS.slice(1).map(([, v]) => {
-  const p = K.plane(0.6, 0.34, 160, 90, (c) => { c.font = '800 70px Inter'; c.textAlign = "center"; c.fillStyle = "#4ff0a0"; c.fillText("+2", 80, 72); });
+  const p = K.plane(0.6, 0.34, 160, 90, (c) => { c.font = '800 74px Bricolage'; c.textAlign = "center"; c.fillStyle = C.css.green; c.fillText("+2", 80, 72); });
   p.position.set(v - 1, Y2 + 1.75, 0.2); scene.add(p); return p;
 });
-const qMark = K.plane(0.9, 1.2, 180, 240, (c) => { c.font = '900 220px "Inter Display"'; c.textAlign = "center"; c.fillStyle = "#ffd23f"; c.fillText("?", 90, 200); });
+const qMark = K.plane(0.9, 1.2, 180, 240, (c) => { c.font = '800 220px Bricolage'; c.textAlign = "center"; c.lineWidth = 14; c.strokeStyle = C.css.ink; c.strokeText("?", 90, 200); c.fillStyle = C.css.navy; c.fillText("?", 90, 200); });
 qMark.position.set(2, Y2 + 1.0, 0.2); scene.add(qMark);
 function coinPos(t) {
   if (t < STOPS[0][0]) { const p = outCubic(prog(t, 3.15, 3.6)); return [-6, Y2 + 0.75 + (1 - p) * 4, 0.2, 0]; }
@@ -107,16 +105,17 @@ S.ring(6.9, 7.75, () => [2, Y2 + 1.0, 0.2], 130);
 // ---------- shot 3: the turning arrow ----------
 numberLine(Y3, -4, 4);
 const arrow = new THREE.Group(); arrow.position.set(0, Y3 + 0.95, 0.15); scene.add(arrow);
-const arrowMat = K.mats.gold();
+const arrowMat = K.mats.navy();
 const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.3, 32), arrowMat);
 shaft.rotation.z = Math.PI / 2; shaft.position.x = 1.15;
 const head = new THREE.Mesh(new THREE.ConeGeometry(0.34, 0.75, 40), arrowMat);
 head.rotation.z = -Math.PI / 2; head.position.x = 2.65;
 const hub = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 16), arrowMat);
+[shaft, head, hub].forEach(m => K.outline(m, 0.035));
 arrow.add(shaft, head, hub);
-const arc = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.035, 12, 96, Math.PI), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0 }));
+const arc = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.035, 12, 96, Math.PI), new THREE.MeshBasicMaterial({ color: C.ink, transparent: true, opacity: 0 }));
 arc.rotation.x = Math.PI / 2; arc.position.set(0, Y3 + 0.95, 0.15); scene.add(arc);
-const goldCol = new THREE.Color(C.gold);
+const navyCol = new THREE.Color(C.navy);
 
 // ---------- shot 4: the app ----------
 const APP = { start: 19.9, push: 20.0, wrong: 20.9, right: 22.0 };
@@ -160,7 +159,7 @@ S.onFrame(t => {
   barR.rotation.set(0, Math.sin(spin) * 0.35, outBack(prog(t, 2.0, 2.5)) * Math.PI / 2);
   times.scale.setScalar(Math.max(0.001, 1 - outCubic(prog(t, 1.6, 2.0))));
   times.rotation.z = t * 1.2;
-  barMat.forEach(m => { m.color.copy(negCol).lerp(posCol, prog(t, 2.1, 2.5)); m.emissive.copy(m.color); });
+  barMat.forEach(m => m.color.copy(negCol).lerp(posCol, prog(t, 2.1, 2.5)));
   const pulse = Math.sin(prog(t, 2.35, 2.8) * Math.PI) * 0.25;
   hook.scale.setScalar(1 + pulse);
   hook.rotation.y = merge * Math.sin(t * 0.8) * 0.4;
@@ -176,10 +175,9 @@ S.onFrame(t => {
   // shot 3
   const f1 = outBack(prog(t, 14.2, 15.0)), f2 = outBack(prog(t, 15.8, 16.6));
   arrow.rotation.y = (f1 + f2) * Math.PI;
-  // gold → red when it turns backwards → green when it turns forwards again
-  if (t < 16.0) arrowMat.color.copy(goldCol).lerp(negCol, prog(t, 14.4, 14.9));
+  // navy → red when it turns backwards → green when it turns forwards again
+  if (t < 16.0) arrowMat.color.copy(navyCol).lerp(negCol, prog(t, 14.4, 14.9));
   else arrowMat.color.copy(negCol).lerp(posCol, prog(t, 16.0, 16.5));
-  arrowMat.metalness = 0.9 - 0.5 * prog(t, 14.4, 14.9);
   arc.material.opacity = Math.max(Math.sin(prog(t, 14.2, 15.2) * Math.PI), Math.sin(prog(t, 15.8, 16.8) * Math.PI)) * 0.9;
   arc.rotation.z = t > 15.5 ? Math.PI : 0;
   arrow.position.y = Y3 + 0.95 + Math.sin(t * 2) * 0.04;
@@ -193,7 +191,7 @@ S.onFrame(t => {
   btn.style.opacity = b; bio.style.opacity = b;
   btn.style.transform = `scale(${0.8 + 0.2 * outBack(b) + (t > 23.5 ? Math.sin((t - 23.5) * 4) * 0.025 : 0)})`;
 });
-K.loadBrand("../lib/").then(b => { brand = b; screen = K.mqScript(ph, quiz, b.fiveADay, APP); S.start(); });
+K.loadBrand("../lib/").then(b => { brand = b; S.refreshTextures(); screen = K.mqScript(ph, quiz, b.fiveADay, APP); S.start(); });
 </script>
 </body>
 </html>

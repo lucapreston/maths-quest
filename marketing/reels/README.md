@@ -33,4 +33,8 @@ Copy a `reel.html` and change its captions, 3D objects and camera keys. Shared p
 - `roundedBox`, `plane` (canvas-textured), `phone`, `mats`
 - `mqQuestion` / `mqScript` / `loadBrand`: the app's question screen and the "5 a day" → question → wrong → right phone sequence
 
-`lib/assets/five-a-day.png` is a real app screenshot. `lib/fonts/` has Bricolage Grotesque (OFL), the closest match to the app's type.
+The look follows the app: mustard background, cream/navy/red/green toon-shaded objects with thick ink outlines
+(`outline(mesh)`), Bricolage captions with colour words (`gold` class = navy highlight, `neg` = red, `pos` = green).
+
+`lib/assets/five-a-day.png` is a real app screenshot and `lib/assets/mascot.png` the mascot. `lib/fonts/` has
+Bricolage Grotesque (OFL), the closest match to the app's type.
